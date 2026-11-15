@@ -3,7 +3,12 @@ import { getEmployees, getInstructors, createEmployee, updateEmployee, deleteEmp
 import type { User } from '../types';
 import { usePagination } from '../hooks/usePagination';
 import { PaginatedPanel } from '../components/PaginatedPanel';
-import { Users, UserCheck, Search, Mail, Shield, Clock, Eye, Edit2, Plus, ListFilter, Trash2, ArrowLeft, UserPlus, AlertCircle } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { Avatar } from '../components/Avatar';
+import { FormField } from '../components/FormField';
+import { Status, formatEnum } from '../components/StatusDot';
+import { btn, inputCls, formatDate } from '../components/ui';
+import { Users, Search, Eye, Pencil, Plus, ListFilter, Trash2, ArrowLeft, AlertCircle } from 'lucide-react';
 
 const EmployeesPage: React.FC = () => {
     const [employees, setEmployees] = useState<User[]>([]);
@@ -42,11 +47,6 @@ const EmployeesPage: React.FC = () => {
     // Client-side pagination (back to page 1 when the tab or search changes)
     const { pageItems, paginationProps } = usePagination(filtered, { resetKey: `${tab}|${search}` });
 
-    const statusColors: Record<string, string> = {
-        ACTIVE: 'bg-accent-emerald/10 text-accent-emerald border-emerald-200',
-        INACTIVE: 'bg-surface-100 text-surface-500 border-surface-200',
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedUser) return;
@@ -70,161 +70,121 @@ const EmployeesPage: React.FC = () => {
         }
     };
 
-    // Inline Page View (Add, Edit, View)
+    const closeForm = () => {
+        setViewMode('list');
+        setFormError(null);
+    };
+
+    // Inline page view (add, edit, view)
     if (viewMode !== 'list') {
+        const readOnly = viewMode === 'view';
+        const noun = tab === 'employees' ? 'employee' : 'instructor';
+        const title = viewMode === 'add' ? `Add ${noun}` : viewMode === 'edit' ? 'Edit member' : 'Member details';
+        const description =
+            viewMode === 'add'
+                ? 'Set the role and account status for the new member'
+                : viewMode === 'edit'
+                ? 'Update profile information, role and account status'
+                : 'Profile, role and account status';
+
         return (
-            <div className="max-w-4xl mx-auto space-y-6 pb-16 animate-fade-in">
-                {/* Top Navigation */}
-                <div className="flex items-center justify-between">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setViewMode('list');
-                            setFormError(null);
-                        }}
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-surface-600 hover:text-surface-900 transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Team Members
-                    </button>
-                </div>
+            <div className="max-w-2xl space-y-6 pb-16">
+                <button
+                    type="button"
+                    onClick={closeForm}
+                    className="inline-flex items-center gap-2 text-sm text-surface-600 hover:text-surface-900 transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+                    Back to team members
+                </button>
 
-                {/* Banner Header */}
-                <div className="bg-gradient-orbit rounded-3xl p-8 text-white shadow-glow relative overflow-hidden">
-                    <div className="relative z-10 max-w-xl">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md mb-3">
-                            <UserPlus className="w-3.5 h-3.5" />
-                            {viewMode === 'add' ? 'New Team Member' : viewMode === 'edit' ? 'Edit Member' : 'Member Profile'}
-                        </span>
-                        <h1 className="text-3xl font-extrabold tracking-tight">
-                            {viewMode === 'add'
-                                ? `Add New ${tab === 'employees' ? 'Employee' : 'Instructor'}`
-                                : viewMode === 'edit'
-                                ? 'Edit Member Details'
-                                : 'Team Member Details'}
-                        </h1>
-                        <p className="mt-2 text-orbit-100 text-sm leading-relaxed">
-                            {viewMode === 'add'
-                                ? 'Register and configure a new team member with organizational permissions and account status.'
-                                : viewMode === 'edit'
-                                ? 'Update profile information, assigned roles, and current operational status.'
-                                : 'View organizational profile, role assignments, and account status.'}
-                        </p>
-                    </div>
-                </div>
+                <PageHeader title={title} description={description} />
 
-                {/* Form Card */}
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {formError && (
-                        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-700 font-medium flex items-center gap-2">
-                            <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-600" />
+                        <div role="alert" className="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />
                             <span>{formError}</span>
                         </div>
                     )}
 
-                    <div className="bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 shadow-card space-y-6">
-                        <div className="flex items-center gap-2 pb-3 border-b border-surface-100">
-                            <Users className="w-5 h-5 text-orbit-600" />
-                            <h2 className="text-base font-bold text-surface-900">Member Information</h2>
-                        </div>
+                    <div className="panel p-6 space-y-5">
+                        <h2 className="text-base font-medium text-surface-900">Member information</h2>
 
-                        <div className="space-y-5">
-                            <div>
-                                <label className="block text-xs font-bold text-surface-600 uppercase tracking-wider mb-1.5">
-                                    Full Name <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    disabled={viewMode === 'view'}
-                                    value={selectedUser?.fullName || ''}
-                                    onChange={(e) => setSelectedUser({ ...selectedUser!, fullName: e.target.value })}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 focus:bg-white focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all disabled:bg-surface-100 disabled:text-surface-500 text-surface-900 text-sm"
-                                    placeholder="John Doe"
-                                />
-                            </div>
+                        <FormField label="Full name" htmlFor="member-name" required>
+                            <input
+                                id="member-name"
+                                type="text"
+                                required
+                                disabled={readOnly}
+                                value={selectedUser?.fullName || ''}
+                                onChange={(e) => setSelectedUser({ ...selectedUser!, fullName: e.target.value })}
+                                className={inputCls}
+                                placeholder="John Doe"
+                            />
+                        </FormField>
 
-                            <div>
-                                <label className="block text-xs font-bold text-surface-600 uppercase tracking-wider mb-1.5">
-                                    Email Address <span className="text-rose-500">*</span>
-                                </label>
-                                <input
-                                    type="email"
-                                    required
-                                    disabled={viewMode === 'view'}
-                                    value={selectedUser?.email || ''}
-                                    onChange={(e) => setSelectedUser({ ...selectedUser!, email: e.target.value })}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 focus:bg-white focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all disabled:bg-surface-100 disabled:text-surface-500 text-surface-900 text-sm"
-                                    placeholder="john@orbit.com"
-                                />
-                            </div>
+                        <FormField label="Email address" htmlFor="member-email" required>
+                            <input
+                                id="member-email"
+                                type="email"
+                                required
+                                disabled={readOnly}
+                                value={selectedUser?.email || ''}
+                                onChange={(e) => setSelectedUser({ ...selectedUser!, email: e.target.value })}
+                                className={inputCls}
+                                placeholder="john@orbit.com"
+                            />
+                        </FormField>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="block text-xs font-bold text-surface-600 uppercase tracking-wider mb-1.5">
-                                        Role <span className="text-rose-500">*</span>
-                                    </label>
-                                    <select
-                                        disabled={viewMode === 'view'}
-                                        value={selectedUser?.role || (tab === 'employees' ? 'EMPLOYEE' : 'INSTRUCTOR')}
-                                        onChange={(e) => setSelectedUser({ ...selectedUser!, role: e.target.value })}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 focus:bg-white focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all disabled:bg-surface-100 disabled:text-surface-500 text-surface-900 text-sm font-medium cursor-pointer"
-                                    >
-                                        <option value="EMPLOYEE">Employee</option>
-                                        <option value="INSTRUCTOR">Instructor</option>
-                                        <option value="ADMIN">Admin</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-surface-600 uppercase tracking-wider mb-1.5">
-                                        Status <span className="text-rose-500">*</span>
-                                    </label>
-                                    <select
-                                        disabled={viewMode === 'view'}
-                                        value={selectedUser?.status || 'ACTIVE'}
-                                        onChange={(e) => setSelectedUser({ ...selectedUser!, status: e.target.value })}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 focus:bg-white focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all disabled:bg-surface-100 disabled:text-surface-500 text-surface-900 text-sm font-medium cursor-pointer"
-                                    >
-                                        <option value="ACTIVE">Active</option>
-                                        <option value="INACTIVE">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="pt-4 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-surface-100">
-                            {viewMode === 'view' ? (
-                                <button
-                                    type="button"
-                                    onClick={() => setViewMode('list')}
-                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-surface-100 text-surface-700 font-semibold hover:bg-surface-200 transition-all text-sm"
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <FormField label="Role" htmlFor="member-role" required>
+                                <select
+                                    id="member-role"
+                                    disabled={readOnly}
+                                    value={selectedUser?.role || (tab === 'employees' ? 'EMPLOYEE' : 'INSTRUCTOR')}
+                                    onChange={(e) => setSelectedUser({ ...selectedUser!, role: e.target.value })}
+                                    className={`${inputCls} cursor-pointer`}
                                 >
+                                    <option value="EMPLOYEE">Employee</option>
+                                    <option value="INSTRUCTOR">Instructor</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </FormField>
+                            <FormField label="Status" htmlFor="member-status" required>
+                                <select
+                                    id="member-status"
+                                    disabled={readOnly}
+                                    value={selectedUser?.status || 'ACTIVE'}
+                                    onChange={(e) => setSelectedUser({ ...selectedUser!, status: e.target.value })}
+                                    className={`${inputCls} cursor-pointer`}
+                                >
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="INACTIVE">Inactive</option>
+                                </select>
+                            </FormField>
+                        </div>
+
+                        <div className="pt-5 flex items-center justify-end gap-2 border-t border-surface-200">
+                            {readOnly ? (
+                                <button type="button" onClick={() => setViewMode('list')} className={btn.secondary}>
                                     Back
                                 </button>
                             ) : (
                                 <>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setViewMode('list');
-                                            setFormError(null);
-                                        }}
-                                        className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-surface-200 text-surface-700 font-semibold hover:bg-surface-50 transition-all text-sm"
-                                    >
+                                    <button type="button" onClick={closeForm} className={btn.secondary}>
                                         Cancel
                                     </button>
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-orbit-600 text-white font-semibold shadow-glow hover:bg-orbit-700 transition-all disabled:opacity-50 text-sm"
-                                    >
+                                    <button type="submit" disabled={isSubmitting} className={btn.primary}>
                                         {isSubmitting ? (
                                             <>
                                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                Saving...
+                                                Saving
                                             </>
+                                        ) : viewMode === 'add' ? (
+                                            'Create member'
                                         ) : (
-                                            viewMode === 'add' ? 'Save Changes' : 'Update Member'
+                                            'Save changes'
                                         )}
                                     </button>
                                 </>
@@ -236,69 +196,72 @@ const EmployeesPage: React.FC = () => {
         );
     }
 
+    const tabs: { key: 'employees' | 'instructors'; label: string; count: number }[] = [
+        { key: 'employees', label: 'Employees', count: employees.length },
+        { key: 'instructors', label: 'Instructors', count: instructors.length },
+    ];
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-surface-900">Team Members</h1>
-                    <p className="text-sm text-surface-500 mt-1">Manage employees and instructors</p>
-                </div>
-                <button
-                    onClick={() => {
-                        setViewMode('add');
-                        setSelectedUser({
-                            fullName: '',
-                            email: '',
-                            role: tab === 'employees' ? 'EMPLOYEE' : 'INSTRUCTOR',
-                            status: 'ACTIVE',
-                        });
-                        setFormError(null);
-                    }}
-                    className="flex items-center gap-2 px-6 py-3 bg-orbit-600 text-white rounded-xl font-bold shadow-glow hover:bg-orbit-700 transition-all transform active:scale-95"
-                >
-                    <Plus className="w-5 h-5" />
-                    Add {tab === 'employees' ? 'Employee' : 'Instructor'}
-                </button>
+            <PageHeader
+                title="Team members"
+                description="Manage employees and instructors"
+                actions={
+                    <button
+                        onClick={() => {
+                            setViewMode('add');
+                            setSelectedUser({
+                                fullName: '',
+                                email: '',
+                                role: tab === 'employees' ? 'EMPLOYEE' : 'INSTRUCTOR',
+                                status: 'ACTIVE',
+                            });
+                            setFormError(null);
+                        }}
+                        className={btn.primary}
+                    >
+                        <Plus className="w-4 h-4" strokeWidth={1.5} />
+                        Add {tab === 'employees' ? 'employee' : 'instructor'}
+                    </button>
+                }
+            />
+
+            {/* Tabs: the selected one carries the accent underline */}
+            <div role="tablist" className="flex items-center gap-6 border-b border-surface-200">
+                {tabs.map((t) => (
+                    <button
+                        key={t.key}
+                        role="tab"
+                        aria-selected={tab === t.key}
+                        onClick={() => setTab(t.key)}
+                        className={`-mb-px h-10 text-sm border-b-2 transition-colors duration-150 ${
+                            tab === t.key
+                                ? 'border-orbit-600 text-surface-900 font-medium'
+                                : 'border-transparent text-surface-600 hover:text-surface-900'
+                        }`}
+                    >
+                        {t.label}
+                        <span className="ml-1.5 text-surface-500 tabular-nums">{t.count}</span>
+                    </button>
+                ))}
             </div>
 
-            {/* Tabs */}
+            {/* Search & filter */}
             <div className="flex items-center gap-3">
-                <button
-                    onClick={() => setTab('employees')}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === 'employees'
-                        ? 'bg-orbit-600 text-white shadow-glow'
-                        : 'bg-white text-surface-600 border border-surface-200 hover:border-orbit-300'
-                        }`}
-                >
-                    <Users className="w-4 h-4" /> Employees ({employees.length})
-                </button>
-                <button
-                    onClick={() => setTab('instructors')}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === 'instructors'
-                        ? 'bg-accent-violet text-white shadow-lg'
-                        : 'bg-white text-surface-600 border border-surface-200 hover:border-accent-violet'
-                        }`}
-                >
-                    <UserCheck className="w-4 h-4" /> Instructors ({instructors.length})
-                </button>
-            </div>
-
-            {/* Search & Filter */}
-            <div className="flex items-center gap-4">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" strokeWidth={1.5} />
                     <input
                         type="text"
-                        placeholder={`Search ${tab}...`}
+                        aria-label={`Search ${tab}`}
+                        placeholder={`Search ${tab}`}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-surface-200 bg-white text-sm
-                focus:outline-none focus:ring-2 focus:ring-orbit-500/30 focus:border-orbit-500 transition-all"
+                        className={`${inputCls} h-9 pl-9`}
                     />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2.5 border border-surface-200 rounded-xl text-surface-600 bg-white hover:bg-surface-50 transition-all">
-                    <ListFilter className="w-4 h-4" />
-                    <span className="text-sm font-medium">Filter</span>
+                <button className={btn.secondary}>
+                    <ListFilter className="w-4 h-4" strokeWidth={1.5} />
+                    Filter
                 </button>
             </div>
 
@@ -311,71 +274,48 @@ const EmployeesPage: React.FC = () => {
                     title: search ? 'No members match your search' : 'No members found',
                     description: search
                         ? 'Try a different name or email.'
-                        : `There are no ${tab} to display yet. Use the Add button to create one.`,
+                        : `There are no ${tab} yet. Use the add button to create one.`,
                 }}
                 pagination={paginationProps}
-                tbodyClassName="divide-y divide-surface-50"
+                tbodyClassName="divide-y divide-surface-100"
                 tableHead={
-                    <tr className="bg-surface-50 border-b border-surface-100">
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Name</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Email</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Role</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Status</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Joined</th>
-                        <th className="text-right text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Actions</th>
+                    <tr className="bg-surface-50 border-b border-surface-200">
+                        <th className="th">Name</th>
+                        <th className="th">Email</th>
+                        <th className="th">Role</th>
+                        <th className="th">Status</th>
+                        <th className="th">Joined</th>
+                        <th className="th text-right">Actions</th>
                     </tr>
                 }
             >
-                {pageItems.map((user, i) => (
-                    <tr
-                        key={user.id}
-                        className="hover:bg-orbit-50/30 transition-colors animate-slide-up"
-                        style={{ animationDelay: `${i * 0.03}s` }}
-                    >
-                        <td className="px-6 py-4">
+                {pageItems.map((user) => (
+                    <tr key={user.id} className="hover:bg-surface-50 transition-colors duration-150">
+                        <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
-                                <div className={`w-9 h-9 rounded-xl ${tab === 'employees'
-                                    ? 'bg-gradient-to-br from-orbit-500 to-orbit-700'
-                                    : 'bg-gradient-to-br from-accent-violet to-purple-700'
-                                    } flex items-center justify-center text-white text-sm font-bold`}>
-                                    {user.fullName.charAt(0)}
-                                </div>
-                                <span className="text-sm font-semibold text-surface-900">{user.fullName}</span>
+                                <Avatar name={user.fullName} />
+                                <span className="text-sm font-medium text-surface-900">{user.fullName}</span>
                             </div>
                         </td>
-                        <td className="px-6 py-4">
-                            <span className="flex items-center gap-1.5 text-sm text-surface-500">
-                                <Mail className="w-3.5 h-3.5" /> {user.email}
-                            </span>
+                        <td className="px-5 py-3 text-sm text-surface-600">{user.email}</td>
+                        <td className="px-5 py-3 text-sm text-surface-600">{formatEnum(user.role)}</td>
+                        <td className="px-5 py-3">
+                            <Status tone={user.status === 'ACTIVE' ? 'positive' : 'neutral'}>{formatEnum(user.status)}</Status>
                         </td>
-                        <td className="px-6 py-4">
-                            <span className="flex items-center gap-1.5 text-sm text-surface-600">
-                                <Shield className="w-3.5 h-3.5" /> {user.role}
-                            </span>
-                        </td>
-                        <td className="px-6 py-4">
-                            <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusColors[user.status]}`}>
-                                {user.status}
-                            </span>
-                        </td>
-                        <td className="px-6 py-4">
-                            <span className="flex items-center gap-1.5 text-sm text-surface-400">
-                                <Clock className="w-3.5 h-3.5" />
-                                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                            </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                        <td className="px-5 py-3 text-sm text-surface-600 tabular-nums">{formatDate(user.createdAt)}</td>
+                        <td className="px-5 py-3">
+                            <div className="flex items-center justify-end gap-1">
                                 <button
                                     onClick={() => {
                                         setSelectedUser(user);
                                         setViewMode('view');
                                         setFormError(null);
                                     }}
-                                    className="p-1.5 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-all"
-                                    title="View Details"
+                                    className={btn.icon}
+                                    title="View details"
+                                    aria-label={`View ${user.fullName}`}
                                 >
-                                    <Eye className="w-4.5 h-4.5" />
+                                    <Eye className="w-4 h-4" strokeWidth={1.5} />
                                 </button>
                                 <button
                                     onClick={() => {
@@ -383,10 +323,11 @@ const EmployeesPage: React.FC = () => {
                                         setViewMode('edit');
                                         setFormError(null);
                                     }}
-                                    className="p-1.5 text-surface-400 hover:text-accent-violet hover:bg-violet-50 rounded-lg transition-all"
-                                    title="Edit Details"
+                                    className={btn.icon}
+                                    title="Edit details"
+                                    aria-label={`Edit ${user.fullName}`}
                                 >
-                                    <Edit2 className="w-4.5 h-4.5" />
+                                    <Pencil className="w-4 h-4" strokeWidth={1.5} />
                                 </button>
                                 <button
                                     onClick={async () => {
@@ -399,10 +340,11 @@ const EmployeesPage: React.FC = () => {
                                             }
                                         }
                                     }}
-                                    className="p-1.5 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                    className={btn.iconDanger}
                                     title="Delete"
+                                    aria-label={`Delete ${user.fullName}`}
                                 >
-                                    <Trash2 className="w-4.5 h-4.5" />
+                                    <Trash2 className="w-4 h-4" strokeWidth={1.5} />
                                 </button>
                             </div>
                         </td>

@@ -12,28 +12,26 @@ export interface EmptyStateProps {
     variant?: PanelVariant;
 }
 
-const THEME: Record<PanelVariant, { circle: string; title: string; text: string }> = {
-    light: { circle: 'bg-surface-100 text-surface-500', title: 'text-surface-900', text: 'text-surface-500' },
-    dark: { circle: 'bg-gray-800 text-gray-500', title: 'text-gray-100', text: 'text-gray-400' },
+const THEME: Record<PanelVariant, { icon: string; title: string; text: string }> = {
+    light: { icon: 'text-surface-400', title: 'text-surface-900', text: 'text-surface-600' },
+    dark: { icon: 'text-surface-300', title: 'text-white', text: 'text-surface-300' },
 };
 
 /** Centered "nothing to show" block used inside every paginated list. */
 export const EmptyState: React.FC<EmptyStateProps> = ({
     icon: Icon = FileText,
-    title = 'No data available',
-    description = 'There are currently no items to display. Check back later or try adjusting your filters.',
+    title = 'Nothing here yet',
+    description = 'There is nothing to show right now. Try adjusting your filters.',
     action,
     variant = 'light',
 }) => {
     const t = THEME[variant];
     return (
         <div className="flex flex-col items-center text-center max-w-sm mx-auto">
-            <div className={`w-24 h-24 rounded-full flex items-center justify-center ${t.circle}`}>
-                <Icon className="w-10 h-10" strokeWidth={1.5} aria-hidden="true" />
-            </div>
-            <h3 className={`mt-5 text-lg font-bold ${t.title}`}>{title}</h3>
-            <p className={`mt-1.5 text-sm leading-relaxed ${t.text}`}>{description}</p>
-            {action && <div className="mt-5">{action}</div>}
+            <Icon className={`w-6 h-6 ${t.icon}`} strokeWidth={1.5} aria-hidden="true" />
+            <h3 className={`mt-3 text-sm font-medium ${t.title}`}>{title}</h3>
+            <p className={`mt-1 text-sm ${t.text}`}>{description}</p>
+            {action && <div className="mt-4">{action}</div>}
         </div>
     );
 };

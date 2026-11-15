@@ -62,7 +62,7 @@ const PayrollListPage: React.FC = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-surface-900 flex items-center gap-2">
+                    <h1 className="text-2xl font-medium text-surface-900 flex items-center gap-2">
                         <DollarSign className="w-8 h-8 text-orbit-600" />
                         Payroll Management
                     </h1>
@@ -71,13 +71,13 @@ const PayrollListPage: React.FC = () => {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => fetchData()}
-                        className="p-2.5 border border-surface-200 rounded-xl text-surface-600 bg-white hover:bg-surface-50 transition-all"
+                        className="p-2.5 border border-surface-200 rounded-lg text-surface-600 bg-white hover:bg-surface-50 transition-colors"
                     >
                         <TrendingUp className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => navigate('/admin/payroll/create')}
-                        className="flex items-center gap-2 px-6 py-3 bg-orbit-600 text-white rounded-xl font-bold shadow-glow hover:bg-orbit-700 transition-all transform active:scale-95"
+                        className="flex items-center gap-2 px-6 py-3 bg-orbit-600 text-white rounded-lg font-medium hover:bg-orbit-700 transition-colors active:scale-[0.98]"
                     >
                         <Plus className="w-5 h-5" />
                         Create Payroll
@@ -87,33 +87,33 @@ const PayrollListPage: React.FC = () => {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl shadow-card border border-surface-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-orbit-50 rounded-xl flex items-center justify-center text-orbit-600">
+                <div className="bg-white p-6 rounded-xl shadow-card border border-surface-100 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-orbit-50 rounded-lg flex items-center justify-center text-orbit-600">
                         <Briefcase className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-surface-500 uppercase">Total Employees</p>
-                        <p className="text-2xl font-bold text-surface-900">{payrollList.length}</p>
+                        <p className="text-xs font-medium text-surface-500">Total Employees</p>
+                        <p className="text-2xl font-medium text-surface-900">{payrollList.length}</p>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-card border border-surface-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-accent-emerald/10 rounded-xl flex items-center justify-center text-accent-emerald">
+                <div className="bg-white p-6 rounded-xl shadow-card border border-surface-100 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-accent-emerald/10 rounded-lg flex items-center justify-center text-accent-emerald">
                         <DollarSign className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-surface-500 uppercase">Monthly Payout</p>
-                        <p className="text-2xl font-bold text-surface-900">
+                        <p className="text-xs font-medium text-surface-500">Monthly Payout</p>
+                        <p className="text-2xl font-medium text-surface-900">
                             ${payrollList.reduce((acc, curr) => acc + (curr.netSalary || 0), 0).toLocaleString()}
                         </p>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-card border border-surface-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-accent-violet/10 rounded-xl flex items-center justify-center text-accent-violet">
+                <div className="bg-white p-6 rounded-xl shadow-card border border-surface-100 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-orbit-600/10 rounded-lg flex items-center justify-center text-orbit-600">
                         <Building2 className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-surface-500 uppercase">Departments</p>
-                        <p className="text-2xl font-bold text-surface-900">
+                        <p className="text-xs font-medium text-surface-500">Departments</p>
+                        <p className="text-2xl font-medium text-surface-900">
                             {new Set(payrollList.map(p => p.department)).size}
                         </p>
                     </div>
@@ -129,10 +129,10 @@ const PayrollListPage: React.FC = () => {
                         placeholder="Search by name, email or department..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-surface-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orbit-500/30 focus:border-orbit-500 transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-surface-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orbit-500/30 focus:border-orbit-500 transition-colors"
                     />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2.5 border border-surface-200 rounded-xl text-surface-600 bg-white hover:bg-surface-50 transition-all">
+                <button className="flex items-center gap-2 px-4 py-2.5 border border-surface-200 rounded-lg text-surface-600 bg-white hover:bg-surface-50 transition-colors">
                     <Download className="w-4 h-4" />
                     <span className="text-sm font-medium">Export</span>
                 </button>
@@ -151,28 +151,28 @@ const PayrollListPage: React.FC = () => {
                 tbodyClassName="divide-y divide-surface-50"
                 tableHead={
                     <tr className="bg-surface-50 border-b border-surface-100">
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Employee</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Department</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Position</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Type</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Net Salary</th>
-                        <th className="text-right text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Actions</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Employee</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Department</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Position</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Type</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Net Salary</th>
+                        <th className="text-right text-xs font-medium text-surface-500 px-6 py-4">Actions</th>
                     </tr>
                 }
             >
                 {pageItems.map((item, i) => (
                     <tr
                         key={item.id}
-                        className="hover:bg-orbit-50/20 transition-colors animate-slide-up"
+                        className="hover:bg-orbit-50/20 transition-colors"
                         style={{ animationDelay: `${i * 0.05}s` }}
                     >
                         <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-orbit-500 to-orbit-700 rounded-xl flex items-center justify-center text-white font-bold shadow-sm">
+                                <div className="w-10 h-10 bg-gradient-to-br from-orbit-500 to-orbit-700 rounded-lg flex items-center justify-center text-white font-medium shadow-sm">
                                     {item.name.charAt(0)}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-surface-900">{item.name}</p>
+                                    <p className="text-sm font-medium text-surface-900">{item.name}</p>
                                     <p className="text-xs text-surface-500">{item.email}</p>
                                 </div>
                             </div>
@@ -184,7 +184,7 @@ const PayrollListPage: React.FC = () => {
                             {item.designation}
                         </td>
                         <td className="px-6 py-4">
-                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${item.employmentType === 'FULL_TIME'
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${item.employmentType === 'FULL_TIME'
                                     ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                                     : 'bg-amber-50 text-amber-600 border-amber-100'
                                 }`}>
@@ -192,7 +192,7 @@ const PayrollListPage: React.FC = () => {
                             </span>
                         </td>
                         <td className="px-6 py-4">
-                            <span className="text-sm font-bold text-orbit-600">
+                            <span className="text-sm font-medium text-orbit-600">
                                 ${item.netSalary?.toLocaleString() || '0'}
                             </span>
                         </td>
@@ -200,21 +200,21 @@ const PayrollListPage: React.FC = () => {
                             <div className="flex items-center justify-end gap-2">
                                 <button
                                     onClick={() => navigate(`/admin/payroll/details/${item.id}`)}
-                                    className="p-2 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-xl transition-all"
+                                    className="p-2 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
                                     title="View Details"
                                 >
                                     <Eye className="w-4.5 h-4.5" />
                                 </button>
                                 <button
                                     onClick={() => navigate(`/admin/payroll/edit/${item.id}`)}
-                                    className="p-2 text-surface-400 hover:text-accent-violet hover:bg-violet-50 rounded-xl transition-all"
+                                    className="p-2 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
                                     title="Edit"
                                 >
                                     <Edit2 className="w-4.5 h-4.5" />
                                 </button>
                                 <button
                                     onClick={() => handleDelete(item.id, item.name)}
-                                    className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                    className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Delete"
                                 >
                                     <Trash2 className="w-4.5 h-4.5" />

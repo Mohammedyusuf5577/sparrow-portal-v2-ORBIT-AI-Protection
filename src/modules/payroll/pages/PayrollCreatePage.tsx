@@ -71,15 +71,15 @@ const PayrollCreatePage: React.FC = () => {
         <div className="max-w-4xl mx-auto space-y-6">
             <button
                 onClick={() => navigate('/admin/payroll')}
-                className="flex items-center gap-2 text-surface-500 hover:text-orbit-600 font-semibold transition-all group"
+                className="flex items-center gap-2 text-surface-500 hover:text-orbit-600 font-medium transition-colors group"
             >
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                 Back to List
             </button>
 
-            <div className="bg-white rounded-3xl shadow-card overflow-hidden border border-surface-100">
+            <div className="bg-white rounded-2xl shadow-card overflow-hidden border border-surface-100">
                 <div className="px-8 py-6 bg-gradient-to-r from-orbit-600 to-orbit-800 text-white">
-                    <h1 className="text-2xl font-bold">New Payroll Profile</h1>
+                    <h1 className="text-2xl font-medium">New Payroll Profile</h1>
                     <p className="text-white/80 mt-1">Initialize payroll for a new employee</p>
                 </div>
 
@@ -88,19 +88,19 @@ const PayrollCreatePage: React.FC = () => {
                     <section className="space-y-6">
                         <div className="flex items-center gap-2 pb-2 border-b border-surface-100">
                             <UserIcon className="w-5 h-5 text-orbit-600" />
-                            <h2 className="text-lg font-bold text-surface-900">Basic Information</h2>
+                            <h2 className="text-lg font-medium text-surface-900">Basic Information</h2>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Select Employee</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Select Employee</label>
                                 <div className="relative">
                                     <UserCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                     <select
                                         required
                                         value={formData.employeeId}
                                         onChange={(e) => handleEmployeeChange(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all appearance-none bg-white"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors appearance-none bg-white"
                                     >
                                         <option value="">Select an employee...</option>
                                         {employees.map(emp => (
@@ -111,7 +111,7 @@ const PayrollCreatePage: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Full Name</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Full Name</label>
                                 <div className="relative">
                                     <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                     <input
@@ -119,13 +119,13 @@ const PayrollCreatePage: React.FC = () => {
                                         required
                                         readOnly
                                         value={formData.name}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 bg-surface-50 text-surface-500 outline-none transition-colors"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Email Address</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Email Address</label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                     <input
@@ -133,13 +133,13 @@ const PayrollCreatePage: React.FC = () => {
                                         required
                                         readOnly
                                         value={formData.email}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-200 bg-surface-50 text-surface-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 bg-surface-50 text-surface-500 outline-none transition-colors"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Mobile Number</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Mobile Number</label>
                                 <div className="relative">
                                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                     <input
@@ -147,7 +147,7 @@ const PayrollCreatePage: React.FC = () => {
                                         required
                                         value={formData.mobile}
                                         onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors"
                                         placeholder="+1 234 567 890"
                                     />
                                 </div>
@@ -158,13 +158,13 @@ const PayrollCreatePage: React.FC = () => {
                     {/* Employment Info */}
                     <section className="space-y-6">
                         <div className="flex items-center gap-2 pb-2 border-b border-surface-100">
-                            <Briefcase className="w-5 h-5 text-accent-violet" />
-                            <h2 className="text-lg font-bold text-surface-900">Employment Details</h2>
+                            <Briefcase className="w-5 h-5 text-orbit-600" />
+                            <h2 className="text-lg font-medium text-surface-900">Employment Details</h2>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Department</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Department</label>
                                 <div className="relative">
                                     <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                     <input
@@ -172,14 +172,14 @@ const PayrollCreatePage: React.FC = () => {
                                         required
                                         value={formData.department}
                                         onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors"
                                         placeholder="Engineering, Sales, etc."
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Designation</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Designation</label>
                                 <div className="relative">
                                     <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                     <input
@@ -187,14 +187,14 @@ const PayrollCreatePage: React.FC = () => {
                                         required
                                         value={formData.designation}
                                         onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors"
                                         placeholder="Software Engineer, Manager, etc."
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Join Date</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Join Date</label>
                                 <div className="relative">
                                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                     <input
@@ -202,18 +202,18 @@ const PayrollCreatePage: React.FC = () => {
                                         required
                                         value={formData.joinDate}
                                         onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-2">Employment Type</label>
+                                <label className="block text-xs font-medium text-surface-500 mb-2">Employment Type</label>
                                 <select
                                     required
                                     value={formData.employmentType}
                                     onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all appearance-none bg-white"
+                                    className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors appearance-none bg-white"
                                 >
                                     <option value="FULL_TIME">Full Time</option>
                                     <option value="CONTRACT">Contract</option>
@@ -226,14 +226,14 @@ const PayrollCreatePage: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => navigate('/admin/payroll')}
-                            className="px-6 py-3 rounded-xl border border-surface-200 text-surface-600 font-bold hover:bg-surface-50 transition-all"
+                            className="px-6 py-3 rounded-lg border border-surface-200 text-surface-600 font-medium hover:bg-surface-50 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex items-center gap-2 px-10 py-3 bg-orbit-600 text-white rounded-2xl font-bold shadow-glow hover:bg-orbit-700 transition-all transform active:scale-95 disabled:opacity-50"
+                            className="flex items-center gap-2 px-10 py-3 bg-orbit-600 text-white rounded-xl font-medium hover:bg-orbit-700 transition-colors active:scale-[0.98] disabled:opacity-50"
                         >
                             {loading ? (
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

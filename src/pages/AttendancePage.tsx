@@ -67,8 +67,8 @@ const AttendancePage: React.FC = () => {
     const { pageItems, paginationProps } = usePagination(filtered, { resetKey: search });
 
     const statusConfig: Record<string, { color: string; bg: string; icon: any }> = {
-        PRESENT: { color: 'text-accent-emerald', bg: 'bg-emerald-50 border-emerald-200', icon: UserCheck },
-        ABSENT: { color: 'text-accent-rose', bg: 'bg-rose-50 border-rose-200', icon: UserX },
+        PRESENT: { color: 'text-accent-emerald', bg: 'bg-green-50 border-green-200', icon: UserCheck },
+        ABSENT: { color: 'text-accent-rose', bg: 'bg-red-50 border-red-200', icon: UserX },
         LATE: { color: 'text-accent-amber', bg: 'bg-amber-50 border-amber-200', icon: Clock },
     };
 
@@ -76,7 +76,7 @@ const AttendancePage: React.FC = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-surface-900">Attendance</h1>
+                    <h1 className="text-2xl font-medium text-surface-900">Attendance</h1>
                     <p className="text-sm text-surface-500 mt-1">Track daily attendance records</p>
                 </div>
             </div>
@@ -88,13 +88,13 @@ const AttendancePage: React.FC = () => {
                     { label: 'Absent', count: records.filter((r) => r.status === 'ABSENT').length, color: 'from-accent-rose to-rose-700', icon: UserX },
                     { label: 'Late', count: records.filter((r) => r.status === 'LATE').length, color: 'from-accent-amber to-amber-600', icon: Clock },
                 ].map((s, i) => (
-                    <div key={i} className="bg-white rounded-2xl p-5 shadow-card animate-slide-up" style={{ animationDelay: `${i * 0.1}s` }}>
+                    <div key={i} className="bg-white rounded-xl p-5 shadow-card" style={{ animationDelay: `${i * 0.1}s` }}>
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-2xl font-bold text-surface-900">{s.count}</p>
+                                <p className="text-2xl font-medium text-surface-900">{s.count}</p>
                                 <p className="text-sm text-surface-500">{s.label}</p>
                             </div>
-                            <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center`}>
+                            <div className={`w-11 h-11 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center`}>
                                 <s.icon className="w-5 h-5 text-white" />
                             </div>
                         </div>
@@ -130,22 +130,22 @@ const AttendancePage: React.FC = () => {
                 tbodyClassName="divide-y divide-surface-50"
                 tableHead={
                     <tr className="bg-surface-50 border-b border-surface-100">
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Employee</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Date</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Status</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Check In</th>
-                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Check Out</th>
-                        <th className="text-right text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Actions</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-3.5">Employee</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-3.5">Date</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-3.5">Status</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-3.5">Check In</th>
+                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-3.5">Check Out</th>
+                        <th className="text-right text-xs font-medium text-surface-500 px-6 py-3.5">Actions</th>
                     </tr>
                 }
             >
                 {pageItems.map((record, i) => {
                 const config = statusConfig[record.status] || statusConfig.PRESENT;
                 return (
-                    <tr key={record.id} className="hover:bg-orbit-50/30 transition-colors animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
+                    <tr key={record.id} className="hover:bg-orbit-50/30 transition-colors" style={{ animationDelay: `${i * 0.03}s` }}>
                         <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-orbit-50 flex items-center justify-center text-orbit-600 text-sm font-bold">
+                                <div className="w-8 h-8 rounded-lg bg-orbit-50 flex items-center justify-center text-orbit-600 text-sm font-medium">
                                     {record.employeeName?.charAt(0)}
                                 </div>
                                 <span className="text-sm font-medium text-surface-800">{record.employeeName}</span>
@@ -155,7 +155,7 @@ const AttendancePage: React.FC = () => {
                             {new Date(record.date).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border ${config.bg} ${config.color}`}>
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border ${config.bg} ${config.color}`}>
                                 <config.icon className="w-3 h-3" />
                                 {record.status}
                             </span>
@@ -174,7 +174,7 @@ const AttendancePage: React.FC = () => {
                                         setModalMode('view');
                                         setIsModalOpen(true);
                                     }}
-                                    className="p-1.5 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-all"
+                                    className="p-1.5 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
                                     title="View Details"
                                 >
                                     <Eye className="w-4.5 h-4.5" />
@@ -185,14 +185,14 @@ const AttendancePage: React.FC = () => {
                                         setModalMode('edit');
                                         setIsModalOpen(true);
                                     }}
-                                    className="p-1.5 text-surface-400 hover:text-accent-violet hover:bg-violet-50 rounded-lg transition-all"
+                                    className="p-1.5 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
                                     title="Edit Record"
                                 >
                                     <Edit2 className="w-4.5 h-4.5" />
                                 </button>
                                 <button
                                     onClick={() => handleDelete(record.id)}
-                                    className="p-1.5 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                    className="p-1.5 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Delete Record"
                                 >
                                     <Trash2 className="w-4.5 h-4.5" />
@@ -206,10 +206,10 @@ const AttendancePage: React.FC = () => {
 
             {/* Modal */}
             {isModalOpen && selectedRecord && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-900/50 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-scale-up">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-900/50 animate-fade-in">
+                    <div className="bg-white rounded-xl shadow-elevated w-full max-w-lg overflow-hidden animate-scale-up">
                         <div className="px-6 py-4 border-b border-surface-100 flex items-center justify-between bg-surface-50">
-                            <h2 className="text-lg font-bold text-surface-900">
+                            <h2 className="text-lg font-medium text-surface-900">
                                 {modalMode === 'edit' ? 'Edit Attendance Record' : 'Attendance Details'}
                             </h2>
                             <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-surface-200 rounded-lg transition-colors">
@@ -219,25 +219,25 @@ const AttendancePage: React.FC = () => {
                         <form onSubmit={handleUpdate} className="p-6 space-y-4">
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-1">Employee</label>
-                                    <div className="px-4 py-2.5 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 text-sm font-medium">
+                                    <label className="block text-xs font-medium text-surface-500 mb-1">Employee</label>
+                                    <div className="px-4 py-2.5 rounded-lg bg-surface-50 border border-surface-200 text-surface-900 text-sm font-medium">
                                         {selectedRecord.employeeName}
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-1">Date</label>
-                                        <div className="px-4 py-2.5 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 text-sm font-medium">
+                                        <label className="block text-xs font-medium text-surface-500 mb-1">Date</label>
+                                        <div className="px-4 py-2.5 rounded-lg bg-surface-50 border border-surface-200 text-surface-900 text-sm font-medium">
                                             {new Date(selectedRecord.date).toLocaleDateString()}
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-1">Status</label>
+                                        <label className="block text-xs font-medium text-surface-500 mb-1">Status</label>
                                         <select
                                             disabled={modalMode === 'view'}
                                             value={selectedRecord.status}
                                             onChange={(e) => setSelectedRecord({ ...selectedRecord, status: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all disabled:bg-surface-50 disabled:text-surface-500"
+                                            className="w-full px-4 py-2.5 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors disabled:bg-surface-50 disabled:text-surface-500"
                                         >
                                             <option value="PRESENT">Present</option>
                                             <option value="ABSENT">Absent</option>
@@ -247,23 +247,23 @@ const AttendancePage: React.FC = () => {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-1">Check In Time</label>
+                                        <label className="block text-xs font-medium text-surface-500 mb-1">Check In Time</label>
                                         <input
                                             type="datetime-local"
                                             disabled={modalMode === 'view'}
                                             value={selectedRecord.checkInTime ? selectedRecord.checkInTime.slice(0, 19) : ''}
                                             onChange={(e) => setSelectedRecord({ ...selectedRecord, checkInTime: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all disabled:bg-surface-50 disabled:text-surface-500"
+                                            className="w-full px-4 py-2.5 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors disabled:bg-surface-50 disabled:text-surface-500"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-surface-500 uppercase tracking-wider mb-1">Check Out Time</label>
+                                        <label className="block text-xs font-medium text-surface-500 mb-1">Check Out Time</label>
                                         <input
                                             type="datetime-local"
                                             disabled={modalMode === 'view'}
                                             value={selectedRecord.checkOutTime ? selectedRecord.checkOutTime.slice(0, 19) : ''}
                                             onChange={(e) => setSelectedRecord({ ...selectedRecord, checkOutTime: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-all disabled:bg-surface-50 disabled:text-surface-500"
+                                            className="w-full px-4 py-2.5 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 outline-none transition-colors disabled:bg-surface-50 disabled:text-surface-500"
                                         />
                                     </div>
                                 </div>
@@ -274,14 +274,14 @@ const AttendancePage: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => setIsModalOpen(false)}
-                                        className="flex-1 px-4 py-3 rounded-xl border border-surface-200 text-surface-700 font-bold hover:bg-surface-50 transition-all font-premium"
+                                        className="flex-1 px-4 py-3 rounded-lg border border-surface-200 text-surface-700 font-medium hover:bg-surface-50 transition-colors font-premium"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="flex-1 px-4 py-3 rounded-xl bg-orbit-600 text-white font-bold shadow-glow hover:bg-orbit-700 transition-all disabled:opacity-50 font-premium"
+                                        className="flex-1 px-4 py-3 rounded-lg bg-orbit-600 text-white font-medium hover:bg-orbit-700 transition-colors disabled:opacity-50 font-premium"
                                     >
                                         {isSubmitting ? 'Saving...' : 'Save Changes'}
                                     </button>

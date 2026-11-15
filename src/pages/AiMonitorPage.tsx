@@ -90,11 +90,11 @@ const AiMonitorPage: React.FC = () => {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orbit-500 to-accent-violet flex items-center justify-center shadow-glow">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orbit-500 to-orbit-600 flex items-center justify-center">
                     <Brain className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-surface-900">AI Monitor</h1>
+                    <h1 className="text-2xl font-medium text-surface-900">AI Monitor</h1>
                     <p className="text-sm text-surface-500">Intelligent risk detection & analysis</p>
                 </div>
             </div>
@@ -103,12 +103,12 @@ const AiMonitorPage: React.FC = () => {
             <div className={`bg-gradient-to-r ${riskColor === 'rose' ? 'from-rose-500 to-rose-700' :
                     riskColor === 'amber' ? 'from-amber-500 to-orange-600' :
                         'from-emerald-500 to-emerald-700'
-                } rounded-2xl p-8 text-white shadow-elevated animate-bounce-in`}>
+                } rounded-xl p-8 text-white shadow-elevated`}>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
                         <p className="text-sm font-medium text-white/80 mb-1">Overall Risk Assessment</p>
-                        <h2 className="text-5xl font-bold mb-2">{summary?.riskScore || 0}<span className="text-2xl font-normal text-white/60">/100</span></h2>
-                        <p className="text-lg font-semibold">{summary?.riskLevel} Risk Level</p>
+                        <h2 className="text-5xl font-medium mb-2">{summary?.riskScore || 0}<span className="text-2xl font-normal text-white/60">/100</span></h2>
+                        <p className="text-lg font-medium">{summary?.riskLevel} Risk Level</p>
                     </div>
                     <div className="grid grid-cols-3 gap-6">
                         {[
@@ -118,7 +118,7 @@ const AiMonitorPage: React.FC = () => {
                         ].map((stat, i) => (
                             <div key={i} className="text-center">
                                 <stat.icon className="w-5 h-5 mx-auto mb-1.5 text-white/70" />
-                                <p className="text-2xl font-bold">{stat.value}</p>
+                                <p className="text-2xl font-medium">{stat.value}</p>
                                 <p className="text-xs text-white/60">{stat.label}</p>
                             </div>
                         ))}
@@ -131,26 +131,26 @@ const AiMonitorPage: React.FC = () => {
                 {factors.map((factor, i) => (
                     <div
                         key={i}
-                        className="bg-white rounded-2xl p-6 shadow-card border border-surface-100 animate-slide-up"
+                        className="bg-white rounded-xl p-6 shadow-card border border-surface-100"
                         style={{ animationDelay: `${i * 0.1}s` }}
                     >
                         <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-10 h-10 rounded-xl bg-${factor.color}/10 flex items-center justify-center`}>
+                            <div className={`w-10 h-10 rounded-lg bg-${factor.color}/10 flex items-center justify-center`}>
                                 <factor.icon className={`w-5 h-5 text-${factor.color}`} />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-surface-800">{factor.label}</p>
+                                <p className="text-sm font-medium text-surface-800">{factor.label}</p>
                                 <p className="text-xs text-surface-400">Count: {factor.value}</p>
                             </div>
                         </div>
                         <div className="mb-2">
                             <div className="flex justify-between text-xs mb-1">
                                 <span className="text-surface-500">Impact Score</span>
-                                <span className="font-semibold text-surface-700">+{factor.impact}</span>
+                                <span className="font-medium text-surface-700">+{factor.impact}</span>
                             </div>
                             <div className="h-2 bg-surface-100 rounded-full overflow-hidden">
                                 <div
-                                    className={`h-full bg-${factor.color} rounded-full transition-all duration-1000 ease-out`}
+                                    className={`h-full bg-${factor.color} rounded-full transition-colors duration-150 ease-out`}
                                     style={{ width: `${Math.min((factor.impact / 100) * 100, 100)}%` }}
                                 />
                             </div>
@@ -164,7 +164,7 @@ const AiMonitorPage: React.FC = () => {
 
             {/* Notifications */}
             <PaginatedPanel
-                className="animate-slide-up"
+                className=""
                 style={{ animationDelay: '0.3s' }}
                 minBodyHeightClass="min-h-[16rem]"
                 isEmpty={notifications.length === 0}
@@ -179,7 +179,7 @@ const AiMonitorPage: React.FC = () => {
                     <div className="flex items-center justify-between px-6 py-4 border-b border-surface-100">
                         <div className="flex items-center gap-3">
                             <Bell className="w-5 h-5 text-orbit-600" />
-                            <h3 className="text-sm font-bold text-surface-800">AI Alerts & Notifications</h3>
+                            <h3 className="text-sm font-medium text-surface-800">AI Alerts & Notifications</h3>
                         </div>
                         <span className="text-xs text-surface-400">
                             {notifications.filter((n) => !n.read).length} unread

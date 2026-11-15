@@ -53,14 +53,14 @@ const LeavesPage: React.FC = () => {
 
     const statusColors: Record<string, string> = {
         PENDING: 'bg-amber-50 text-accent-amber border-amber-200',
-        APPROVED: 'bg-emerald-50 text-accent-emerald border-emerald-200',
-        REJECTED: 'bg-rose-50 text-accent-rose border-rose-200',
+        APPROVED: 'bg-green-50 text-accent-emerald border-green-200',
+        REJECTED: 'bg-red-50 text-accent-rose border-red-200',
     };
 
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-surface-900">Leave Requests</h1>
+                <h1 className="text-2xl font-medium text-surface-900">Leave Requests</h1>
                 <p className="text-sm text-surface-500 mt-1">Review and manage employee leave applications</p>
             </div>
 
@@ -82,7 +82,7 @@ const LeavesPage: React.FC = () => {
                         <button
                             key={s}
                             onClick={() => setFilter(s)}
-                            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${filter === s
+                            className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-colors ${filter === s
                                     ? 'bg-orbit-600 text-white shadow-glow'
                                     : 'bg-white text-surface-600 border border-surface-200 hover:border-orbit-300'
                                 }`}
@@ -110,22 +110,22 @@ const LeavesPage: React.FC = () => {
                 {pageItems.map((leave, i) => (
                     <div
                         key={leave.id}
-                        className="bg-white rounded-2xl p-5 shadow-card border border-surface-100 hover:shadow-elevated transition-all duration-300 animate-slide-up"
+                        className="bg-white rounded-xl p-5 shadow-card border border-surface-100 hover:border-surface-300 transition-colors duration-150"
                         style={{ animationDelay: `${i * 0.05}s` }}
                     >
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orbit-500 to-orbit-700 flex items-center justify-center text-white text-sm font-bold">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orbit-500 to-orbit-700 flex items-center justify-center text-white text-sm font-medium">
                                     {leave.employeeName?.charAt(0)}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-surface-900">{leave.employeeName}</p>
+                                    <p className="text-sm font-medium text-surface-900">{leave.employeeName}</p>
                                     <p className="text-xs text-surface-400">
                                         {new Date(leave.startDate).toLocaleDateString()} — {new Date(leave.endDate).toLocaleDateString()}
                                     </p>
                                 </div>
                             </div>
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusColors[leave.status]}`}>
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border ${statusColors[leave.status]}`}>
                                 {leave.status === 'PENDING' && <Clock className="w-3 h-3" />}
                                 {leave.status === 'APPROVED' && <Check className="w-3 h-3" />}
                                 {leave.status === 'REJECTED' && <X className="w-3 h-3" />}
@@ -134,7 +134,7 @@ const LeavesPage: React.FC = () => {
                         </div>
 
                         {leave.reason && (
-                            <p className="text-xs text-surface-500 mb-4 p-3 rounded-xl bg-surface-50">
+                            <p className="text-xs text-surface-500 mb-4 p-3 rounded-lg bg-surface-50">
                                 "{leave.reason}"
                             </p>
                         )}
@@ -143,13 +143,13 @@ const LeavesPage: React.FC = () => {
                             <div className="flex items-center gap-2 pt-3 border-t border-surface-100">
                                 <button
                                     onClick={() => handleApprove(leave.id)}
-                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-white bg-accent-emerald rounded-xl hover:bg-emerald-600 transition-colors"
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-white bg-accent-emerald rounded-lg hover:bg-green-600 transition-colors"
                                 >
                                     <Check className="w-3.5 h-3.5" /> Approve
                                 </button>
                                 <button
                                     onClick={() => handleReject(leave.id)}
-                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-white bg-accent-rose rounded-xl hover:bg-rose-600 transition-colors"
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-white bg-accent-rose rounded-lg hover:bg-red-600 transition-colors"
                                 >
                                     <X className="w-3.5 h-3.5" /> Reject
                                 </button>

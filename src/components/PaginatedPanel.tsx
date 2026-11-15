@@ -8,20 +8,20 @@ import { Pagination } from './Pagination';
 export const DEFAULT_MIN_BODY_HEIGHT = 'min-h-[28rem]';
 
 const CARD: Record<PanelVariant, string> = {
-    light: 'bg-white rounded-2xl shadow-card border border-surface-100 overflow-hidden',
-    dark: 'bg-gray-900/60 border border-gray-800/60 rounded-2xl overflow-hidden',
+    light: 'panel overflow-hidden',
+    dark: 'bg-surface-900 border border-surface-800 rounded-xl overflow-hidden',
 };
 
 const SPINNER: Record<PanelVariant, string> = {
-    light: 'border-orbit-200 border-t-orbit-600',
-    dark: 'border-indigo-900 border-t-indigo-500',
+    light: 'border-surface-200 border-t-orbit-600',
+    dark: 'border-surface-700 border-t-orbit-500',
 };
 
 const Loader: React.FC<{ variant: PanelVariant }> = ({ variant }) => (
     <div
         role="status"
         aria-label="Loading"
-        className={`w-9 h-9 border-4 rounded-full animate-spin ${SPINNER[variant]}`}
+        className={`w-6 h-6 border-2 rounded-full animate-spin ${SPINNER[variant]}`}
     />
 );
 

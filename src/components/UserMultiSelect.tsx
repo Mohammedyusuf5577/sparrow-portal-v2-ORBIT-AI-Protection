@@ -114,15 +114,15 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
         <div className="space-y-3">
             {/* Selected Chips Strip */}
             {selectedUserIds.length > 0 && (
-                <div className="flex flex-wrap gap-2 p-3 bg-surface-50 border border-surface-200 rounded-xl">
-                    <div className="w-full flex items-center justify-between text-xs font-semibold text-surface-600 mb-1">
+                <div className="flex flex-wrap gap-2 p-3 bg-surface-50 border border-surface-200 rounded-lg">
+                    <div className="w-full flex items-center justify-between text-xs font-medium text-surface-600 mb-1">
                         <span>
                             Selected Team Members ({selectedUserIds.length})
                         </span>
                         <button
                             type="button"
                             onClick={() => onChange([])}
-                            className="text-xs text-rose-600 hover:text-rose-700 font-medium"
+                            className="text-xs text-red-600 hover:text-red-700 font-medium"
                         >
                             Clear all
                         </button>
@@ -161,7 +161,7 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search employees by name or email..."
-                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-surface-200 rounded-xl text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-surface-200 rounded-lg text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-colors"
                 />
                 {searchTerm && (
                     <button
@@ -198,7 +198,7 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
             )}
 
             {/* User Options Box */}
-            <div className="border border-surface-200 rounded-xl bg-white max-h-60 overflow-y-auto divide-y divide-surface-100 shadow-sm">
+            <div className="border border-surface-200 rounded-lg bg-white max-h-60 overflow-y-auto divide-y divide-surface-100 shadow-sm">
                 {users.length === 0 && !loading ? (
                     <div className="p-6 text-center text-xs text-surface-500">
                         No employees found matching &quot;{searchTerm}&quot;.
@@ -234,22 +234,22 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                                         {isSelected && <Check className="w-3 h-3" />}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-surface-900">{user.fullName}</p>
+                                        <p className="text-sm font-medium text-surface-900">{user.fullName}</p>
                                         <p className="text-xs text-surface-500">{user.email}</p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
                                     {user.phone ? (
-                                        <span className="text-[10px] font-mono text-surface-500 bg-surface-100 px-2 py-0.5 rounded">
+                                        <span className="text-xs font-mono text-surface-500 bg-surface-100 px-2 py-0.5 rounded">
                                             {user.phone}
                                         </span>
                                     ) : (
-                                        <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                                        <span className="text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
                                             No phone
                                         </span>
                                     )}
-                                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-surface-100 text-surface-700">
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100 text-surface-700">
                                         {user.role}
                                     </span>
                                 </div>
@@ -271,14 +271,14 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                 <button
                     type="button"
                     onClick={handleLoadMore}
-                    className="w-full py-2 border border-surface-200 rounded-xl text-xs font-semibold text-surface-700 hover:bg-surface-50 transition-colors"
+                    className="w-full py-2 border border-surface-200 rounded-lg text-xs font-medium text-surface-700 hover:bg-surface-50 transition-colors"
                 >
                     Load More Employees
                 </button>
             )}
 
             {error && (
-                <p className="text-xs text-rose-600 font-medium animate-fade-in flex items-center gap-1">
+                <p className="text-xs text-red-600 font-medium animate-fade-in flex items-center gap-1">
                     <span>•</span> {error}
                 </p>
             )}

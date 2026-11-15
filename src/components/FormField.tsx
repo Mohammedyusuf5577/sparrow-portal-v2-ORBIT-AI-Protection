@@ -22,18 +22,18 @@ export const FormField: React.FC<FormFieldProps> = ({
     return (
         <div className={`space-y-1.5 ${className}`}>
             <div className="flex items-center justify-between">
-                <label htmlFor={htmlFor} className="block text-xs font-semibold text-surface-700">
+                <label htmlFor={htmlFor} className="block text-sm font-medium text-surface-700">
                     {label}
-                    {required && <span className="text-rose-500 ml-1">*</span>}
+                    {required && <span className="text-accent-rose ml-1">*</span>}
                 </label>
-                {hint && <span className="text-xs text-surface-400">{hint}</span>}
+                {hint && <span className="text-xs text-surface-500">{hint}</span>}
             </div>
 
             {children}
 
             {error && (
-                <p className="text-xs text-rose-600 font-medium animate-fade-in flex items-center gap-1">
-                    <span>•</span> {error}
+                <p role="alert" className="text-xs text-accent-rose animate-fade-in">
+                    {error}
                 </p>
             )}
         </div>

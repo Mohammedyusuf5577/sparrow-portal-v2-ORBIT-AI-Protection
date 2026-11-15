@@ -45,9 +45,9 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
 
     if (variant === 'stat-strip') {
         return (
-            <div className={`p-6 bg-white rounded-2xl border border-surface-200 shadow-card animate-pulse ${className}`}>
+            <div className={`panel p-5 animate-pulse ${className}`}>
                 <div className="h-5 bg-surface-200 rounded w-48 mb-4"></div>
-                <div className="h-44 bg-surface-100 rounded-xl"></div>
+                <div className="h-44 bg-surface-100 rounded-lg"></div>
             </div>
         );
     }
@@ -58,7 +58,7 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
             {items.map((_, i) => (
                 <div
                     key={i}
-                    className="p-6 bg-white rounded-2xl border border-surface-200 shadow-card animate-pulse space-y-4"
+                    className="panel p-5 animate-pulse space-y-4"
                 >
                     <div className="flex items-center justify-between">
                         <div className="h-5 bg-surface-200 rounded w-32"></div>

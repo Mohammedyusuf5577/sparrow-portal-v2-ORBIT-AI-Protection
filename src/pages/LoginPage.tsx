@@ -2,8 +2,33 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/AuthContext';
 import { login as loginApi } from '../api/services';
-import { ArrowRight, Zap, Eye, Activity } from 'lucide-react';
+import { StatusDot, type StatusTone } from '../components/StatusDot';
 import orbitMark from '../assets/images/orbit-mark.png';
+
+// The three inputs of the AI risk score, as shown on the AI Monitor screen.
+const RISK_FACTORS: { label: string; tone: StatusTone }[] = [
+    { label: 'Delayed projects', tone: 'negative' },
+    { label: 'Pending leaves', tone: 'warning' },
+    { label: 'Attendance anomalies', tone: 'active' },
+];
+
+/** Hairline orbit rings: a flat diagram of the product name, cropped by the panel edge. */
+const OrbitRings: React.FC = () => (
+    <svg
+        viewBox="0 0 520 520"
+        className="absolute -right-48 -bottom-48 w-[520px] h-[520px] text-surface-300"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1}
+        aria-hidden="true"
+    >
+        <circle cx="260" cy="260" r="96" />
+        <circle cx="260" cy="260" r="160" />
+        <circle cx="260" cy="260" r="224" />
+        <circle cx="260" cy="260" r="4" fill="currentColor" stroke="none" />
+        <circle cx="192" cy="115" r="5" className="text-orbit-600" fill="currentColor" stroke="none" />
+    </svg>
+);
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -31,87 +56,61 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-surface-50 flex">
-            {/* Left - Brand Section */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-dark relative overflow-hidden">
-                {/* Floating shapes */}
-                <div className="absolute inset-0">
-                    <div className="absolute top-20 left-20 w-72 h-72 bg-orbit-500/20 rounded-full blur-3xl animate-pulse-slow" />
-                    <div className="absolute bottom-32 right-16 w-96 h-96 bg-accent-violet/15 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1.5s' }} />
-                    <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-accent-teal/10 rounded-full blur-2xl animate-pulse-slow" style={{ animationDelay: '3s' }} />
-                </div>
+        <div className="min-h-screen bg-white flex">
+            {/* Left: what the product is */}
+            <div className="hidden lg:flex lg:w-[46%] bg-surface-50 border-r border-surface-200 relative overflow-hidden">
+                <OrbitRings />
 
-                <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-                    <div className="flex items-center gap-4 mb-10">
-                        <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-glow overflow-hidden">
-                            <img src={orbitMark} alt="ORBIT logo" className="w-full h-full object-contain" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight">ORBIT</h1>
-                            <p className="text-sm text-orbit-200 tracking-wider uppercase font-medium">AI Intelligence Platform</p>
+                <div className="relative flex flex-col justify-between w-full px-16 py-14">
+                    <div className="flex items-center gap-3">
+                        <img src={orbitMark} alt="" className="w-10 h-10 object-contain mix-blend-multiply" />
+                        <span className="text-xl font-medium text-surface-900">ORBIT</span>
+                    </div>
+
+                    <div>
+                        <h2 className="text-4xl font-medium leading-tight text-surface-900 max-w-md">
+                            Organizational risk and intelligence
+                        </h2>
+                        <p className="mt-5 text-base leading-relaxed text-surface-600 max-w-md">
+                            Track people, projects, attendance and payroll in one console. The AI risk score shows what needs attention first.
+                        </p>
+
+                        <div className="mt-10 max-w-sm">
+                            <p className="text-sm text-surface-500">What the risk score tracks</p>
+                            <ul className="mt-3 border-t border-surface-200">
+                                {RISK_FACTORS.map((factor) => (
+                                    <li
+                                        key={factor.label}
+                                        className="flex items-center gap-3 h-10 border-b border-surface-200 text-sm text-surface-800"
+                                    >
+                                        <StatusDot tone={factor.tone} />
+                                        {factor.label}
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
 
-                    <h2 className="text-4xl font-bold leading-tight mb-6">
-                        Organizational Risk
-                        <br />
-                        <span className="bg-gradient-to-r from-orbit-300 to-accent-teal bg-clip-text text-transparent">
-                            & Intelligence
-                        </span>
-                    </h2>
-
-                    <p className="text-lg text-white/70 mb-12 max-w-md leading-relaxed">
-                        AI-powered monitoring, risk assessment, and real-time organizational insights for enterprise management.
-                    </p>
-
-                    {/* Feature cards */}
-                    <div className="space-y-4">
-                        {[
-                            { icon: Zap, label: 'AI-Powered Risk Detection', desc: 'Proactive anomaly monitoring' },
-                            { icon: Eye, label: 'Real-time Oversight', desc: 'Complete organizational visibility' },
-                            { icon: Activity, label: 'Smart Analytics', desc: 'Data-driven decision making' },
-                        ].map((feature, i) => (
-                            <div
-                                key={i}
-                                className="flex items-center gap-4 p-4 rounded-xl glass-dark animate-slide-up"
-                                style={{ animationDelay: `${i * 0.15}s` }}
-                            >
-                                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                                    <feature.icon className="w-5 h-5 text-orbit-300" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold">{feature.label}</p>
-                                    <p className="text-xs text-white/50">{feature.desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <p className="text-xs text-surface-500">ORBIT 1.0.0</p>
                 </div>
             </div>
 
-            {/* Right - Login Form */}
+            {/* Right: sign in */}
             <div className="flex-1 flex items-center justify-center p-8">
-                <div className="w-full max-w-md animate-bounce-in">
-                    {/* Mobile logo */}
+                <div className="w-full max-w-sm">
+                    {/* Mobile brand */}
                     <div className="lg:hidden flex items-center gap-3 mb-10">
-                        <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-glow overflow-hidden">
-                            <img src={orbitMark} alt="ORBIT logo" className="w-full h-full object-contain" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold text-surface-900">ORBIT</h1>
-                            <p className="text-xs text-surface-400 tracking-wider uppercase">AI Intelligence</p>
-                        </div>
+                        <img src={orbitMark} alt="" className="w-9 h-9 object-contain" />
+                        <span className="text-lg font-medium text-surface-900">ORBIT</span>
                     </div>
 
-                    <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-surface-900 mb-2">Welcome back</h2>
-                        <p className="text-surface-500">Sign in to your admin dashboard</p>
-                    </div>
+                    <h1 className="text-2xl font-medium text-surface-900">Sign in</h1>
+                    <p className="mt-1.5 text-sm text-surface-600">Use your admin email to open the console</p>
 
-                    <form onSubmit={handleLogin} className="space-y-6">
+                    <form onSubmit={handleLogin} className="mt-8 space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-surface-700 mb-2">
-                                Email Address
+                            <label htmlFor="email-input" className="block text-sm font-medium text-surface-700 mb-1.5">
+                                Email address
                             </label>
                             <input
                                 id="email-input"
@@ -120,15 +119,16 @@ const LoginPage: React.FC = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="admin@orbit.com"
                                 required
-                                className="w-full px-4 py-3 rounded-xl border border-surface-200 bg-white text-surface-900
-                  placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-orbit-500/30
-                  focus:border-orbit-500 transition-all duration-200"
+                                autoComplete="email"
+                                className="w-full h-10 px-3 rounded-lg border border-surface-200 bg-white text-sm text-surface-900
+                  hover:border-surface-300 focus:outline-none focus:ring-2 focus:ring-orbit-600/20
+                  focus:border-orbit-600 transition-colors duration-150"
                             />
                         </div>
 
                         {error && (
-                            <div className="p-3 rounded-xl bg-accent-rose/10 border border-accent-rose/20 animate-fade-in">
-                                <p className="text-sm text-accent-rose font-medium">{error}</p>
+                            <div role="alert" className="px-3 py-2.5 rounded-lg bg-red-50 border border-red-200 animate-fade-in">
+                                <p className="text-sm text-red-700">{error}</p>
                             </div>
                         )}
 
@@ -136,30 +136,22 @@ const LoginPage: React.FC = () => {
                             id="login-button"
                             type="submit"
                             disabled={loading || !email}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl
-                bg-gradient-orbit text-white font-semibold text-sm
-                hover:shadow-glow hover:scale-[1.02] active:scale-[0.98]
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                transition-all duration-200"
+                            className="w-full flex items-center justify-center h-10 rounded-lg
+                bg-orbit-600 text-white text-sm font-medium
+                hover:bg-orbit-700 active:scale-[0.98]
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
+                transition-[background-color,transform] duration-150"
                         >
                             {loading ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
-                                <>
-                                    Sign in to ORBIT
-                                    <ArrowRight className="w-4 h-4" />
-                                </>
+                                'Sign in'
                             )}
                         </button>
                     </form>
 
-                    <div className="mt-8 p-4 rounded-xl bg-orbit-50/50 border border-orbit-100">
-                        <p className="text-xs text-orbit-600 font-medium mb-1">Demo Credentials</p>
-                        <p className="text-xs text-surface-500">Email: <code className="text-orbit-700 font-mono bg-orbit-100 px-1.5 py-0.5 rounded">admin@orbit.com</code></p>
-                    </div>
-
-                    <p className="mt-6 text-center text-xs text-surface-400">
-                        ORBIT v1.0.0 • AI Based Organizational Risk & Intelligence
+                    <p className="mt-8 text-sm text-surface-600">
+                        Demo account: <code className="font-mono text-surface-900">admin@orbit.com</code>
                     </p>
                 </div>
             </div>

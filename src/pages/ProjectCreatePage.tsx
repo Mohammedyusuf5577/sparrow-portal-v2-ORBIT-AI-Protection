@@ -75,7 +75,7 @@ export const ProjectCreatePage: React.FC = () => {
                 <button
                     type="button"
                     onClick={() => navigate('/admin/projects')}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-surface-600 hover:text-surface-900 transition-colors"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Back to Projects
@@ -83,12 +83,12 @@ export const ProjectCreatePage: React.FC = () => {
             </div>
 
             {/* Banner Header */}
-            <div className="bg-gradient-orbit rounded-3xl p-8 text-white shadow-glow relative overflow-hidden">
+            <div className="bg-gradient-orbit rounded-2xl p-8 text-white relative overflow-hidden">
                 <div className="relative z-10 max-w-xl">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md mb-3">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/20 mb-3">
                         <FolderPlus className="w-3.5 h-3.5" /> New Project
                     </span>
-                    <h1 className="text-3xl font-extrabold tracking-tight">Create Enterprise Project</h1>
+                    <h1 className="text-3xl font-medium">Create Enterprise Project</h1>
                     <p className="mt-2 text-orbit-100 text-sm leading-relaxed">
                         Define project milestones, assign members, and dispatch WhatsApp onboarding notifications.
                     </p>
@@ -98,16 +98,16 @@ export const ProjectCreatePage: React.FC = () => {
             {/* Form Container */}
             <form onSubmit={handleSubmit} className="space-y-6">
                 {errors.form && (
-                    <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-700 font-medium">
+                    <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 font-medium">
                         {errors.form}
                     </div>
                 )}
 
                 {/* Section A: Project Core Details */}
-                <div className="bg-white rounded-2xl border border-surface-200 p-6 shadow-card space-y-5">
+                <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-card space-y-5">
                     <div className="flex items-center gap-2 pb-3 border-b border-surface-100">
                         <FolderPlus className="w-5 h-5 text-orbit-600" />
-                        <h2 className="text-base font-bold text-surface-900">Project Information</h2>
+                        <h2 className="text-base font-medium text-surface-900">Project Information</h2>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -118,7 +118,7 @@ export const ProjectCreatePage: React.FC = () => {
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="e.g. Core AI Infrastructure"
-                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-all"
+                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-colors"
                             />
                         </FormField>
 
@@ -129,7 +129,7 @@ export const ProjectCreatePage: React.FC = () => {
                                 value={formData.clientName}
                                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
                                 placeholder="e.g. Acme Corporation or Internal"
-                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-all"
+                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-colors"
                             />
                         </FormField>
                     </div>
@@ -142,7 +142,7 @@ export const ProjectCreatePage: React.FC = () => {
                                 onChange={(e) =>
                                     setFormData({ ...formData, status: e.target.value as ProjectStatusType })
                                 }
-                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 cursor-pointer"
+                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 cursor-pointer"
                             >
                                 <option value="IN_PROGRESS">In Progress</option>
                                 <option value="COMPLETED">Completed</option>
@@ -156,7 +156,7 @@ export const ProjectCreatePage: React.FC = () => {
                                 type="date"
                                 value={formData.startDate}
                                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500"
+                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500"
                             />
                         </FormField>
 
@@ -166,7 +166,7 @@ export const ProjectCreatePage: React.FC = () => {
                                 type="date"
                                 value={formData.endDate}
                                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500"
+                                className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500"
                             />
                         </FormField>
                     </div>
@@ -178,24 +178,24 @@ export const ProjectCreatePage: React.FC = () => {
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Detail project scope, deliverables, and architecture..."
-                            className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-all resize-none"
+                            className="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-colors resize-none"
                         />
                     </FormField>
                 </div>
 
                 {/* Section B: Team Assignment */}
-                <div className="bg-white rounded-2xl border border-surface-200 p-6 shadow-card space-y-4">
+                <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-card space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-surface-100">
                         <div className="flex items-center gap-2">
                             <Users className="w-5 h-5 text-orbit-600" />
                             <div>
-                                <h2 className="text-base font-bold text-surface-900">Team Assignment</h2>
+                                <h2 className="text-base font-medium text-surface-900">Team Assignment</h2>
                                 <p className="text-xs text-surface-500">
                                     Assigned members will receive automated WhatsApp notifications via outbox worker.
                                 </p>
                             </div>
                         </div>
-                        <span className="text-xs font-semibold text-orbit-700 bg-orbit-50 px-2.5 py-1 rounded-full">
+                        <span className="text-xs font-medium text-orbit-700 bg-orbit-50 px-2.5 py-1 rounded-full">
                             {formData.assigneeIds?.length || 0} selected
                         </span>
                     </div>
@@ -212,14 +212,14 @@ export const ProjectCreatePage: React.FC = () => {
                         type="button"
                         onClick={() => navigate('/projects')}
                         disabled={isSubmitting}
-                        className="px-5 py-2.5 rounded-xl border border-surface-200 text-sm font-semibold text-surface-700 hover:bg-surface-100 transition-colors"
+                        className="px-5 py-2.5 rounded-lg border border-surface-200 text-sm font-medium text-surface-700 hover:bg-surface-100 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-orbit text-white rounded-xl text-sm font-semibold shadow-sm hover:shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-orbit text-white rounded-lg text-sm font-medium shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-colors disabled:opacity-50"
                     >
                         <Save className="w-4 h-4" />
                         {isSubmitting ? 'Creating Project...' : 'Save & Dispatch Notifications'}
