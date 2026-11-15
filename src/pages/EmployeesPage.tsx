@@ -5,11 +5,12 @@ import { usePagination } from '../hooks/usePagination';
 import { PaginatedPanel } from '../components/PaginatedPanel';
 import { PageHeader } from '../components/PageHeader';
 import { Avatar } from '../components/Avatar';
+import { Segmented } from '../components/Segmented';
 import { FormField } from '../components/FormField';
 import { Status, formatEnum } from '../components/StatusDot';
 import { btn, inputCls, formatDate } from '../components/ui';
 import { useConfirm, useToast } from '../components/Feedback';
-import { Users, Search, Eye, Pencil, Plus, ListFilter, Trash2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Users, Search, Eye, Pencil, Plus, Trash2, ArrowLeft, AlertCircle } from 'lucide-react';
 
 const EmployeesPage: React.FC = () => {
     const [employees, setEmployees] = useState<User[]>([]);
@@ -17,6 +18,7 @@ const EmployeesPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState<'employees' | 'instructors'>('employees');
     const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'' | 'ACTIVE' | 'INACTIVE'>('');
     const [viewMode, setViewMode] = useState<'list' | 'add' | 'edit' | 'view'>('list');
     const [selectedUser, setSelectedUser] = useState<Partial<User> | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,14 +43,15 @@ const EmployeesPage: React.FC = () => {
     };
 
     const currentList = tab === 'employees' ? employees : instructors;
+    const query = search.toLowerCase();
     const filtered = currentList.filter(
         (u) =>
-            u.fullName.toLowerCase().includes(search.toLowerCase()) ||
-            u.email.toLowerCase().includes(search.toLowerCase())
+            (u.fullName.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)) &&
+            (!statusFilter || u.status === statusFilter)
     );
 
     // Client-side pagination (back to page 1 when the tab or search changes)
-    const { pageItems, paginationProps } = usePagination(filtered, { resetKey: `${tab}|${search}` });
+    const { pageItems, paginationProps } = usePagination(filtered, { resetKey: `${tab}|${search}|${statusFilter}` });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -251,8 +254,8 @@ const EmployeesPage: React.FC = () => {
             </div>
 
             {/* Search & filter */}
-            <div className="flex items-center gap-3">
-                <div className="relative flex-1 max-w-md">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="relative flex-1 min-w-[16rem] max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" strokeWidth={1.5} />
                     <input
                         type="text"
@@ -263,10 +266,16 @@ const EmployeesPage: React.FC = () => {
                         className={`${inputCls} h-9 pl-9`}
                     />
                 </div>
-                <button className={btn.secondary}>
-                    <ListFilter className="w-4 h-4" strokeWidth={1.5} />
-                    Filter
-                </button>
+                <Segmented
+                    ariaLabel="Status"
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={[
+                        { value: '', label: 'All' },
+                        { value: 'ACTIVE', label: 'Active' },
+                        { value: 'INACTIVE', label: 'Inactive' },
+                    ]}
+                />
             </div>
 
             {/* Table */}
@@ -275,9 +284,9 @@ const EmployeesPage: React.FC = () => {
                 isEmpty={filtered.length === 0}
                 empty={{
                     icon: Users,
-                    title: search ? 'No members match your search' : 'No members found',
-                    description: search
-                        ? 'Try a different name or email.'
+                    title: search || statusFilter ? 'No members match your filter' : 'No members found',
+                    description: search || statusFilter
+                        ? 'Try a different name, email or status.'
                         : `There are no ${tab} yet. Use the add button to create one.`,
                 }}
                 pagination={paginationProps}

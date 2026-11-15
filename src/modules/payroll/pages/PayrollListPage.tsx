@@ -9,6 +9,7 @@ import { Avatar } from '../../../components/Avatar';
 import { Stat } from '../../../components/Stat';
 import { formatEnum } from '../../../components/StatusDot';
 import { btn, inputCls, formatINR } from '../../../components/ui';
+import { downloadCsv, toCsv } from '../../../utils/csv';
 import { useConfirm, useToast } from '../../../components/Feedback';
 import { Search, Plus, Eye, Pencil, Trash2, Download, RefreshCw } from 'lucide-react';
 
@@ -61,6 +62,16 @@ const PayrollListPage: React.FC = () => {
     // Client-side pagination (back to page 1 when the search changes)
     const { pageItems, paginationProps } = usePagination(filtered, { resetKey: search });
 
+    // Exports exactly what the search currently shows. Bank and tax details are deliberately left out.
+    const handleExport = () => {
+        const csv = toCsv(
+            ['Employee ID', 'Name', 'Email', 'Mobile', 'Department', 'Designation', 'Employment type', 'Join date', 'Net salary (INR)'],
+            filtered.map((p) => [p.employeeId, p.name, p.email, p.mobile, p.department, p.designation, p.employmentType, p.joinDate, p.netSalary ?? 0])
+        );
+        downloadCsv(`orbit-payroll-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+        toast.success(`Exported ${filtered.length} payroll ${filtered.length === 1 ? 'record' : 'records'}`);
+    };
+
     const monthlyPayout = payrollList.reduce((acc, curr) => acc + (curr.netSalary || 0), 0);
 
     return (
@@ -106,7 +117,13 @@ const PayrollListPage: React.FC = () => {
                         className={`${inputCls} h-9 pl-9`}
                     />
                 </div>
-                <button className={btn.secondary}>
+                <button
+                    type="button"
+                    onClick={handleExport}
+                    disabled={filtered.length === 0}
+                    className={btn.secondary}
+                    title={filtered.length === 0 ? 'Nothing to export' : 'Download the rows shown as CSV'}
+                >
                     <Download className="w-4 h-4" strokeWidth={1.5} />
                     Export
                 </button>
