@@ -12,6 +12,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { PageHeader } from '../components/PageHeader';
 import { Segmented } from '../components/Segmented';
 import { btn, inputCls, selectCls, formatDate } from '../components/ui';
+import { useToast } from '../components/Feedback';
 import { Plus, Search, LayoutGrid, List, FolderKanban, Pencil, Trash2, ArrowDown, ArrowUp, RotateCcw, X } from 'lucide-react';
 
 const STATUS_OPTIONS = [
@@ -42,6 +43,7 @@ const timeline = (start?: string, end?: string) =>
 
 export const ProjectsPage: React.FC = () => {
     const navigate = useNavigate();
+    const toast = useToast();
     const {
         projects,
         meta,
@@ -141,10 +143,11 @@ export const ProjectsPage: React.FC = () => {
         try {
             await softDeleteProject(deleteTarget.id);
             setDeleteTarget(null);
+            toast.success('Project deleted');
             refetch();
         } catch (err) {
             console.error('Failed to soft delete project', err);
-            alert('Failed to delete project. Please try again.');
+            toast.error('Could not delete the project. Please try again.');
         } finally {
             setIsDeleting(false);
         }

@@ -8,6 +8,7 @@ import { Avatar } from '../components/Avatar';
 import { FormField } from '../components/FormField';
 import { Status, formatEnum } from '../components/StatusDot';
 import { btn, inputCls, formatDate } from '../components/ui';
+import { useConfirm, useToast } from '../components/Feedback';
 import { Users, Search, Eye, Pencil, Plus, ListFilter, Trash2, ArrowLeft, AlertCircle } from 'lucide-react';
 
 const EmployeesPage: React.FC = () => {
@@ -20,6 +21,8 @@ const EmployeesPage: React.FC = () => {
     const [selectedUser, setSelectedUser] = useState<Partial<User> | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
+    const toast = useToast();
+    const confirm = useConfirm();
 
     useEffect(() => {
         fetchData();
@@ -59,6 +62,7 @@ const EmployeesPage: React.FC = () => {
             } else if (viewMode === 'edit' && selectedUser.id) {
                 await updateEmployee(selectedUser.id, selectedUser);
             }
+            toast.success(viewMode === 'add' ? 'Member created' : 'Changes saved');
             setViewMode('list');
             fetchData();
         } catch (err: any) {
@@ -331,13 +335,19 @@ const EmployeesPage: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={async () => {
-                                        if (confirm(`Are you sure you want to delete ${user.fullName}?`)) {
-                                            try {
-                                                await deleteEmployee(user.id);
-                                                fetchData();
-                                            } catch (err) {
-                                                console.error(err);
-                                            }
+                                        const ok = await confirm({
+                                            title: 'Delete member?',
+                                            message: `Are you sure you want to delete ${user.fullName}?`,
+                                            confirmText: 'Delete',
+                                        });
+                                        if (!ok) return;
+                                        try {
+                                            await deleteEmployee(user.id);
+                                            toast.success(`${user.fullName} deleted`);
+                                            fetchData();
+                                        } catch (err) {
+                                            console.error(err);
+                                            toast.error('Could not delete the member. Please try again.');
                                         }
                                     }}
                                     className={btn.iconDanger}

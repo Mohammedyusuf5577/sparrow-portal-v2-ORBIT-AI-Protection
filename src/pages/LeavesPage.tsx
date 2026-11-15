@@ -8,6 +8,7 @@ import { Avatar } from '../components/Avatar';
 import { Segmented } from '../components/Segmented';
 import { Status, formatEnum, type StatusTone } from '../components/StatusDot';
 import { btn, inputCls, formatRange } from '../components/ui';
+import { useToast } from '../components/Feedback';
 import { CalendarOff, Search } from 'lucide-react';
 
 const STATUS_TONE: Record<string, StatusTone> = {
@@ -28,6 +29,7 @@ const LeavesPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [search, setSearch] = useState('');
+    const toast = useToast();
 
     useEffect(() => {
         fetchLeaves();
@@ -47,18 +49,22 @@ const LeavesPage: React.FC = () => {
     const handleApprove = async (id: string) => {
         try {
             await approveLeave(id);
+            toast.success('Leave approved');
             fetchLeaves();
         } catch (err) {
             console.error(err);
+            toast.error('Could not approve the leave. Please try again.');
         }
     };
 
     const handleReject = async (id: string) => {
         try {
             await rejectLeave(id);
+            toast.success('Leave rejected');
             fetchLeaves();
         } catch (err) {
             console.error(err);
+            toast.error('Could not reject the leave. Please try again.');
         }
     };
 

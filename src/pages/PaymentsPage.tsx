@@ -15,6 +15,7 @@ import { FormField } from '../components/FormField';
 import { Stat } from '../components/Stat';
 import { Status, type StatusTone } from '../components/StatusDot';
 import { btn, inputCls, formatDate, formatINR } from '../components/ui';
+import { useConfirm } from '../components/Feedback';
 
 // ─── Razorpay window type ────────────────────────────────────────────────────
 declare global {
@@ -54,6 +55,7 @@ const PaymentStatus: React.FC<{ status: string }> = ({ status }) => {
 // ─── Main Page Component ──────────────────────────────────────────────────────
 const PaymentsPage: React.FC = () => {
     useRazorpayScript();
+    const confirm = useConfirm();
 
     // Get stored user for employee ID
     const storedUser = (() => {
@@ -177,7 +179,12 @@ const PaymentsPage: React.FC = () => {
 
     // ── Refund ──
     const handleRefund = async (paymentId: string, amountInr: number) => {
-        if (!window.confirm(`Initiate full refund of ${formatINR(amountInr)}?`)) return;
+        const ok = await confirm({
+            title: 'Refund payment?',
+            message: `Initiate full refund of ${formatINR(amountInr)}?`,
+            confirmText: 'Refund',
+        });
+        if (!ok) return;
         setRefundingId(paymentId);
         try {
             await initiateRefund(paymentId);

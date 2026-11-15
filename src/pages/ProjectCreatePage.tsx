@@ -5,10 +5,12 @@ import type { ProjectCreateRequest } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { ProjectFormFields } from '../components/ProjectFormFields';
 import { btn } from '../components/ui';
+import { useToast } from '../components/Feedback';
 import { ArrowLeft } from 'lucide-react';
 
 export const ProjectCreatePage: React.FC = () => {
     const navigate = useNavigate();
+    const toast = useToast();
 
     const [formData, setFormData] = useState<ProjectCreateRequest>({
         name: '',
@@ -59,6 +61,7 @@ export const ProjectCreatePage: React.FC = () => {
             };
 
             await createProject(payload);
+            toast.success('Project created');
             navigate('/admin/projects');
         } catch (err: any) {
             console.error('Failed to create project', err);

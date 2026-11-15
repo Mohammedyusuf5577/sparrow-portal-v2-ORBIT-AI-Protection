@@ -6,12 +6,14 @@ import { User } from '../../../types';
 import { PageHeader } from '../../../components/PageHeader';
 import { FormField } from '../../../components/FormField';
 import { btn, inputCls } from '../../../components/ui';
+import { useToast } from '../../../components/Feedback';
 import { ArrowLeft } from 'lucide-react';
 
 const READ_ONLY = `${inputCls} bg-surface-50 text-surface-600`;
 
 const PayrollCreatePage: React.FC = () => {
     const navigate = useNavigate();
+    const toast = useToast();
     const [employees, setEmployees] = useState<User[]>([]);
     const [formData, setFormData] = useState({
         employeeId: '',
@@ -54,9 +56,11 @@ const PayrollCreatePage: React.FC = () => {
         setLoading(true);
         try {
             await createPayroll(formData);
+            toast.success('Payroll profile created');
             navigate('/admin/payroll');
         } catch (err) {
             console.error('Failed to create payroll', err);
+            toast.error('Could not create the payroll profile. Please check the details and try again.');
         } finally {
             setLoading(false);
         }

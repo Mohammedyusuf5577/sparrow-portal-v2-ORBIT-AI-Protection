@@ -4,11 +4,13 @@ import { getPayrollById, updatePayroll } from '../services/payrollService';
 import { PageHeader } from '../../../components/PageHeader';
 import { FormField } from '../../../components/FormField';
 import { btn, inputCls } from '../../../components/ui';
+import { useToast } from '../../../components/Feedback';
 import { ArrowLeft } from 'lucide-react';
 
 const PayrollEditPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const toast = useToast();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -53,9 +55,11 @@ const PayrollEditPage: React.FC = () => {
         setSaving(true);
         try {
             await updatePayroll(id, formData);
+            toast.success('Payroll profile updated');
             navigate(`/admin/payroll/details/${id}`);
         } catch (err) {
             console.error('Failed to update payroll', err);
+            toast.error('Could not update the payroll profile. Please try again.');
         } finally {
             setSaving(false);
         }

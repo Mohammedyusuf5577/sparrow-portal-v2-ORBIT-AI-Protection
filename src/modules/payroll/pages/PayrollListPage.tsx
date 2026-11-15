@@ -9,6 +9,7 @@ import { Avatar } from '../../../components/Avatar';
 import { Stat } from '../../../components/Stat';
 import { formatEnum } from '../../../components/StatusDot';
 import { btn, inputCls, formatINR } from '../../../components/ui';
+import { useConfirm, useToast } from '../../../components/Feedback';
 import { Search, Plus, Eye, Pencil, Trash2, Download, RefreshCw } from 'lucide-react';
 
 const PayrollListPage: React.FC = () => {
@@ -16,6 +17,8 @@ const PayrollListPage: React.FC = () => {
     const [payrollList, setPayrollList] = useState<EmployeePayroll[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const toast = useToast();
+    const confirm = useConfirm();
 
     useEffect(() => {
         fetchData();
@@ -33,13 +36,19 @@ const PayrollListPage: React.FC = () => {
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (window.confirm(`Are you sure you want to delete payroll record for ${name}?`)) {
-            try {
-                await deletePayroll(id);
-                fetchData();
-            } catch (err) {
-                console.error('Failed to delete payroll record', err);
-            }
+        const ok = await confirm({
+            title: 'Delete payroll record?',
+            message: `Are you sure you want to delete payroll record for ${name}?`,
+            confirmText: 'Delete',
+        });
+        if (!ok) return;
+        try {
+            await deletePayroll(id);
+            toast.success(`Payroll record for ${name} deleted`);
+            fetchData();
+        } catch (err) {
+            console.error('Failed to delete payroll record', err);
+            toast.error('Could not delete the payroll record. Please try again.');
         }
     };
 

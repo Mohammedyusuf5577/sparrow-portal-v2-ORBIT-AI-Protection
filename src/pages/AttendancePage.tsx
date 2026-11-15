@@ -9,6 +9,7 @@ import { FormField } from '../components/FormField';
 import { Stat } from '../components/Stat';
 import { Status, formatEnum, type StatusTone } from '../components/StatusDot';
 import { btn, inputCls, formatDate, formatTime } from '../components/ui';
+import { useConfirm, useToast } from '../components/Feedback';
 import { CalendarCheck, Search, Eye, Pencil, Trash2, X } from 'lucide-react';
 
 const STATUS_TONE: Record<string, StatusTone> = {
@@ -25,6 +26,8 @@ const AttendancePage: React.FC = () => {
     const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
     const [selectedRecord, setSelectedRecord] = useState<Attendance | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const toast = useToast();
+    const confirm = useConfirm();
 
     useEffect(() => {
         fetchAttendance();
@@ -61,21 +64,30 @@ const AttendancePage: React.FC = () => {
                 checkOutTime: selectedRecord.checkOutTime
             });
             setIsModalOpen(false);
+            toast.success('Attendance record updated');
             fetchAttendance();
         } catch (err) {
             console.error(err);
+            toast.error('Could not update the record. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this record?')) return;
+        const ok = await confirm({
+            title: 'Delete attendance record?',
+            message: 'Are you sure you want to delete this record?',
+            confirmText: 'Delete',
+        });
+        if (!ok) return;
         try {
             await deleteAttendance(id);
+            toast.success('Attendance record deleted');
             fetchAttendance();
         } catch (err) {
             console.error(err);
+            toast.error('Could not delete the record. Please try again.');
         }
     };
 

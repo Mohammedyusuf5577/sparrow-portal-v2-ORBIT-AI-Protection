@@ -5,11 +5,13 @@ import type { ProjectUpdateRequest } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { ProjectFormFields } from '../components/ProjectFormFields';
 import { btn } from '../components/ui';
+import { useToast } from '../components/Feedback';
 import { ArrowLeft } from 'lucide-react';
 
 export const ProjectEditPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const toast = useToast();
 
     const [formData, setFormData] = useState<ProjectUpdateRequest>({
         name: '',
@@ -93,6 +95,7 @@ export const ProjectEditPage: React.FC = () => {
             };
 
             await updateProject(id, payload);
+            toast.success('Project updated');
             navigate('/admin/projects');
         } catch (err: any) {
             console.error('Failed to update project', err);

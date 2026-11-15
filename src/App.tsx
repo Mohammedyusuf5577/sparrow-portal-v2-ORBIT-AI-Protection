@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './store/AuthContext';
+import { FeedbackProvider } from './components/Feedback';
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminLayout from './layout/AdminLayout';
 import LoginPage from './pages/LoginPage';
@@ -29,53 +30,55 @@ const PageFallback = () => (
 const App: React.FC = () => {
     return (
         <AuthProvider>
-            <Router>
-                <Routes>
-                    <Route path="/" element={<LoginPage />} />
-                    <Route
-                        path="/admin"
-                        element={
-                            <ProtectedRoute>
-                                <AdminLayout />
-                            </ProtectedRoute>
-                        }
-                    >
-                        <Route index element={<Navigate to="dashboard" replace />} />
-                        <Route path="dashboard" element={<DashboardPage />} />
-                        <Route path="projects" element={<ProjectsPage />} />
+            <FeedbackProvider>
+                <Router>
+                    <Routes>
+                        <Route path="/" element={<LoginPage />} />
                         <Route
-                            path="projects/new"
+                            path="/admin"
                             element={
-                                <Suspense fallback={<PageFallback />}>
-                                    <ProjectCreatePage />
-                                </Suspense>
+                                <ProtectedRoute>
+                                    <AdminLayout />
+                                </ProtectedRoute>
                             }
-                        />
-                        <Route
-                            path="projects/:id/edit"
-                            element={
-                                <Suspense fallback={<PageFallback />}>
-                                    <ProjectEditPage />
-                                </Suspense>
-                            }
-                        />
-                        <Route path="employees" element={<EmployeesPage />} />
-                        <Route path="attendance" element={<AttendancePage />} />
-                        <Route path="leaves" element={<LeavesPage />} />
-                        <Route path="ai-monitor" element={<AiMonitorPage />} />
+                        >
+                            <Route index element={<Navigate to="dashboard" replace />} />
+                            <Route path="dashboard" element={<DashboardPage />} />
+                            <Route path="projects" element={<ProjectsPage />} />
+                            <Route
+                                path="projects/new"
+                                element={
+                                    <Suspense fallback={<PageFallback />}>
+                                        <ProjectCreatePage />
+                                    </Suspense>
+                                }
+                            />
+                            <Route
+                                path="projects/:id/edit"
+                                element={
+                                    <Suspense fallback={<PageFallback />}>
+                                        <ProjectEditPage />
+                                    </Suspense>
+                                }
+                            />
+                            <Route path="employees" element={<EmployeesPage />} />
+                            <Route path="attendance" element={<AttendancePage />} />
+                            <Route path="leaves" element={<LeavesPage />} />
+                            <Route path="ai-monitor" element={<AiMonitorPage />} />
 
-                        {/* Payroll Module */}
-                        <Route path="payroll" element={<PayrollListPage />} />
-                        <Route path="payroll/create" element={<PayrollCreatePage />} />
-                        <Route path="payroll/details/:id" element={<PayrollDetailsPage />} />
-                        <Route path="payroll/edit/:id" element={<PayrollEditPage />} />
+                            {/* Payroll Module */}
+                            <Route path="payroll" element={<PayrollListPage />} />
+                            <Route path="payroll/create" element={<PayrollCreatePage />} />
+                            <Route path="payroll/details/:id" element={<PayrollDetailsPage />} />
+                            <Route path="payroll/edit/:id" element={<PayrollEditPage />} />
 
-                        {/* Payments Module */}
-                        <Route path="payments" element={<PaymentsPage />} />
-                    </Route>
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </Router>
+                            {/* Payments Module */}
+                            <Route path="payments" element={<PaymentsPage />} />
+                        </Route>
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </Router>
+            </FeedbackProvider>
         </AuthProvider>
     );
 };

@@ -12,6 +12,7 @@ import { Avatar } from '../../../components/Avatar';
 import { FormField } from '../../../components/FormField';
 import { Status, formatEnum } from '../../../components/StatusDot';
 import { btn, inputCls, formatDate, formatINR } from '../../../components/ui';
+import { useToast } from '../../../components/Feedback';
 import { ArrowLeft } from 'lucide-react';
 
 type TabKey = 'info' | 'bank' | 'tax' | 'salary' | 'attendance';
@@ -57,6 +58,7 @@ const PayrollDetailsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabKey>('info');
     const [saving, setSaving] = useState(false);
+    const toast = useToast();
 
     // Form states for sections
     const [bankForm, setBankForm] = useState({ accountName: '', bankName: '', accountNumber: '', ifsc: '' });
@@ -93,8 +95,8 @@ const PayrollDetailsPage: React.FC = () => {
         try {
             const res = await saveBankDetails(id, bankForm);
             setPayroll(res.data.data || null);
-            alert('Bank details updated successfully');
-        } catch (err) { console.error(err); }
+            toast.success('Bank details updated');
+        } catch (err) { console.error(err); toast.error('Could not save bank details. Please try again.'); }
         finally { setSaving(false); }
     };
 
@@ -105,8 +107,8 @@ const PayrollDetailsPage: React.FC = () => {
         try {
             const res = await saveTaxDetails(id, taxForm);
             setPayroll(res.data.data || null);
-            alert('Tax details updated successfully');
-        } catch (err) { console.error(err); }
+            toast.success('Tax details updated');
+        } catch (err) { console.error(err); toast.error('Could not save tax details. Please try again.'); }
         finally { setSaving(false); }
     };
 
@@ -117,8 +119,8 @@ const PayrollDetailsPage: React.FC = () => {
         try {
             const res = await saveSalary(id, salaryForm);
             setPayroll(res.data.data || null);
-            alert('Salary structure updated successfully');
-        } catch (err) { console.error(err); }
+            toast.success('Salary structure updated');
+        } catch (err) { console.error(err); toast.error('Could not save salary structure. Please try again.'); }
         finally { setSaving(false); }
     };
 
@@ -129,8 +131,8 @@ const PayrollDetailsPage: React.FC = () => {
         try {
             const res = await saveAttendance(id, attendanceForm);
             setPayroll(res.data.data || null);
-            alert('Attendance data updated successfully');
-        } catch (err) { console.error(err); }
+            toast.success('Attendance data updated');
+        } catch (err) { console.error(err); toast.error('Could not save attendance data. Please try again.'); }
         finally { setSaving(false); }
     };
 
