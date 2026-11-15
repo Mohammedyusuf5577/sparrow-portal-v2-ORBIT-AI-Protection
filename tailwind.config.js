@@ -29,20 +29,32 @@ export default {
                     rose: '#dc2626',
                     emerald: '#15803d',
                 },
-                // One neutral ramp (graphite) for every surface, border and text role.
+                // One neutral ramp for every surface, border and text role, tinted toward the world
+                // (ORBIT watches from far away: cool ink, saturation kept very low so it never reads as blue).
+                //   page 50, raised 100, hairline 200
                 //   text roles: primary 900, secondary 600, muted 400/500
-                //   hairline:   200
                 surface: {
-                    50: '#fafafa',
-                    100: '#f4f4f5',
-                    200: '#e8e8ea',
-                    300: '#d4d4d8',
-                    400: '#737373',
-                    500: '#737373',
-                    600: '#525252',
-                    700: '#404040',
-                    800: '#262626',
-                    900: '#171717',
+                    50: '#eef1f6', // page: a visible step below the white cards
+                    100: '#e6eaf1', // raised: table heads, segmented tracks, hover rows
+                    200: '#dce1ea', // hairline
+                    300: '#c4ccd8',
+                    400: '#5f6a7d',
+                    500: '#5f6a7d',
+                    600: '#4b5565',
+                    700: '#374151',
+                    800: '#1f2937',
+                    900: '#111827',
+                },
+                // The deepest surface: the sidebar and the login brand panel.
+                ink: {
+                    950: '#07080d',
+                    900: '#0b0d14',
+                    800: '#11141c',
+                    700: '#1a1e28',
+                    600: '#262c3a',
+                    400: '#7a8296',
+                    300: '#a3a9b8',
+                    100: '#eef0f5',
                 },
             },
             fontFamily: {
@@ -51,8 +63,8 @@ export default {
             },
             // Depth is neutral, soft and small. Nothing glows.
             boxShadow: {
-                card: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                elevated: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                card: '0 1px 2px rgba(16, 24, 40, 0.06)',
+                elevated: '0 8px 24px rgba(16, 24, 40, 0.08)',
             },
             transitionTimingFunction: {
                 orbit: 'cubic-bezier(0.22, 1, 0.36, 1)',

@@ -21,8 +21,8 @@
 
 body {
   min-height: 100vh;
-  background: #fafafa;
-  color: #171717;
+  background: #eef1f6;
+  color: #111827;
 }
 
 /* Quiet scrollbar */
@@ -34,11 +34,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: #c4ccd8;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  background: #5f6a7d;
 }
 
 @layer base {
@@ -55,7 +55,7 @@ body {
   }
 
   ::placeholder {
-    color: #737373;
+    color: #667085;
     opacity: 1;
   }
 }

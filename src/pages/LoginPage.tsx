@@ -16,7 +16,7 @@ const RISK_FACTORS: { label: string; tone: StatusTone }[] = [
 const OrbitRings: React.FC = () => (
     <svg
         viewBox="0 0 520 520"
-        className="absolute -right-48 -bottom-48 w-[520px] h-[520px] text-surface-300"
+        className="absolute -right-48 -bottom-48 w-[520px] h-[520px] text-ink-600"
         fill="none"
         stroke="currentColor"
         strokeWidth={1}
@@ -26,7 +26,7 @@ const OrbitRings: React.FC = () => (
         <circle cx="260" cy="260" r="160" />
         <circle cx="260" cy="260" r="224" />
         <circle cx="260" cy="260" r="4" fill="currentColor" stroke="none" />
-        <circle cx="192" cy="115" r="5" className="text-orbit-600" fill="currentColor" stroke="none" />
+        <circle cx="192" cy="115" r="5" className="text-orbit-400" fill="currentColor" stroke="none" />
     </svg>
 );
 
@@ -56,32 +56,34 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white flex">
+        <div className="min-h-screen bg-surface-50 flex">
             {/* Left: what the product is */}
-            <div className="hidden lg:flex lg:w-[46%] bg-surface-50 border-r border-surface-200 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-[46%] bg-ink-900 relative overflow-hidden">
                 <OrbitRings />
 
                 <div className="relative flex flex-col justify-between w-full px-16 py-14">
                     <div className="flex items-center gap-3">
-                        <img src={orbitMark} alt="" className="w-10 h-10 object-contain mix-blend-multiply" />
-                        <span className="text-xl font-medium text-surface-900">ORBIT</span>
+                        <span className="w-10 h-10 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                            <img src={orbitMark} alt="" className="w-9 h-9 object-contain" />
+                        </span>
+                        <span className="text-xl font-medium text-ink-100">ORBIT</span>
                     </div>
 
                     <div>
-                        <h2 className="text-4xl font-medium leading-tight text-surface-900 max-w-md">
+                        <h2 className="text-4xl font-medium leading-tight text-ink-100 max-w-md">
                             Organizational risk and intelligence
                         </h2>
-                        <p className="mt-5 text-base leading-relaxed text-surface-600 max-w-md">
+                        <p className="mt-5 text-base leading-relaxed text-ink-300 max-w-md">
                             Track people, projects, attendance and payroll in one console. The AI risk score shows what needs attention first.
                         </p>
 
                         <div className="mt-10 max-w-sm">
-                            <p className="text-sm text-surface-500">What the risk score tracks</p>
-                            <ul className="mt-3 border-t border-surface-200">
+                            <p className="text-sm text-ink-400">What the risk score tracks</p>
+                            <ul className="mt-3 border-t border-ink-100/10">
                                 {RISK_FACTORS.map((factor) => (
                                     <li
                                         key={factor.label}
-                                        className="flex items-center gap-3 h-10 border-b border-surface-200 text-sm text-surface-800"
+                                        className="flex items-center gap-3 h-10 border-b border-ink-100/10 text-sm text-ink-100"
                                     >
                                         <StatusDot tone={factor.tone} />
                                         {factor.label}
@@ -91,7 +93,7 @@ const LoginPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <p className="text-xs text-surface-500">ORBIT 1.0.0</p>
+                    <p className="text-xs text-ink-400">ORBIT 1.0.0</p>
                 </div>
             </div>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/AuthContext';
 import {
     LayoutDashboard,
@@ -27,9 +27,16 @@ const navItems = [
     { path: '/admin/payroll', label: 'Payroll', icon: IndianRupee },
 ];
 
+/** Section name for the breadcrumb: the nav item whose path the current URL sits under. */
+const sectionLabel = (pathname: string): string | null => {
+    if (pathname.startsWith('/admin/payments')) return 'Payments';
+    return navItems.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`))?.label ?? null;
+};
+
 const AdminLayout: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -38,22 +45,26 @@ const AdminLayout: React.FC = () => {
         navigate('/');
     };
 
+    const section = sectionLabel(pathname);
+
     // The shell never gets shorter than the sidebar's natural height (min-h-[35rem] = 560px). In a shorter window
     // (e.g. DevTools docked and enlarged) the page is cropped / scrolls instead of squeezing the menu,
     // so menu and content sizes stay constant.
     return (
         <div className="flex h-screen min-h-[35rem] bg-surface-50 overflow-hidden">
-            {/* Sidebar: one quiet surface, the page is where the colour lives. */}
+            {/* Sidebar: the deepest surface. Dark ink against the light page gives the shell its anchor. */}
             <aside
                 className={`${sidebarOpen ? 'w-60' : 'w-[72px]'}
-        fixed lg:relative z-30 h-full flex flex-col bg-white border-r border-surface-200
+        fixed lg:relative z-30 h-full flex flex-col bg-ink-900 text-ink-300
         transition-transform duration-200 ease-orbit
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
             >
                 {/* Brand */}
-                <div className={`h-16 flex items-center gap-2.5 border-b border-surface-200 flex-shrink-0 ${sidebarOpen ? 'px-5' : 'justify-center'}`}>
-                    <img src={orbitMark} alt="" className="w-8 h-8 flex-shrink-0 object-contain" />
-                    {sidebarOpen && <span className="text-base font-medium text-surface-900">ORBIT</span>}
+                <div className={`h-16 flex items-center gap-3 border-b border-ink-100/10 flex-shrink-0 ${sidebarOpen ? 'px-5' : 'justify-center'}`}>
+                    <span className="w-8 h-8 flex-shrink-0 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                        <img src={orbitMark} alt="" className="w-7 h-7 object-contain" />
+                    </span>
+                    {sidebarOpen && <span className="text-base font-medium text-ink-100">ORBIT</span>}
                 </div>
 
                 {/* Navigation */}
@@ -68,15 +79,15 @@ const AdminLayout: React.FC = () => {
                                 `flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm transition-colors duration-150
                 ${sidebarOpen ? '' : 'justify-center'}
                 ${isActive
-                                    ? 'bg-surface-100 text-surface-900 font-medium ring-1 ring-inset ring-surface-200'
-                                    : 'text-surface-600 hover:bg-surface-100 hover:text-surface-900'
+                                    ? 'bg-ink-700 text-ink-100 font-medium shadow-[inset_0_1px_0_rgba(238,240,245,0.08)]'
+                                    : 'text-ink-300 hover:bg-ink-800 hover:text-ink-100'
                                 }`
                             }
                         >
                             {({ isActive }) => (
                                 <>
                                     <item.icon
-                                        className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-orbit-600' : 'text-surface-500'}`}
+                                        className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-orbit-400' : 'text-ink-400'}`}
                                         strokeWidth={1.5}
                                     />
                                     <span className={sidebarOpen ? '' : 'sr-only'}>{item.label}</span>
@@ -87,27 +98,27 @@ const AdminLayout: React.FC = () => {
                 </nav>
 
                 {/* Signed-in user */}
-                <div className="p-3 border-t border-surface-200 flex-shrink-0">
+                <div className="p-3 border-t border-ink-100/10 flex-shrink-0">
                     <div className={`flex items-center gap-2.5 px-2.5 py-2 ${sidebarOpen ? '' : 'justify-center'}`}>
                         <div
-                            className="w-8 h-8 flex-shrink-0 rounded-full bg-surface-100 text-surface-700 text-sm font-medium flex items-center justify-center"
+                            className="w-8 h-8 flex-shrink-0 rounded-full bg-ink-700 text-ink-100 text-sm font-medium flex items-center justify-center"
                             aria-hidden="true"
                         >
                             {user?.fullName?.charAt(0) || 'A'}
                         </div>
                         {sidebarOpen && (
                             <div className="min-w-0">
-                                <p className="text-sm font-medium text-surface-900 truncate">{user?.fullName}</p>
-                                <p className="text-xs text-surface-500 truncate">{user?.email}</p>
+                                <p className="text-sm font-medium text-ink-100 truncate">{user?.fullName}</p>
+                                <p className="text-xs text-ink-400 truncate">{user?.email}</p>
                             </div>
                         )}
                     </div>
                     <button
                         onClick={handleLogout}
                         title={sidebarOpen ? undefined : 'Log out'}
-                        className={`flex items-center gap-2.5 h-9 w-full px-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition-colors duration-150 ${sidebarOpen ? '' : 'justify-center'}`}
+                        className={`flex items-center gap-2.5 h-9 w-full px-2.5 rounded-lg text-sm text-ink-300 hover:bg-ink-800 hover:text-ink-100 transition-colors duration-150 ${sidebarOpen ? '' : 'justify-center'}`}
                     >
-                        <LogOut className="w-4 h-4 flex-shrink-0 text-surface-500" strokeWidth={1.5} />
+                        <LogOut className="w-4 h-4 flex-shrink-0 text-ink-400" strokeWidth={1.5} />
                         <span className={sidebarOpen ? '' : 'sr-only'}>Log out</span>
                     </button>
                 </div>
@@ -116,16 +127,16 @@ const AdminLayout: React.FC = () => {
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 z-20 lg:hidden"
+                    className="fixed inset-0 bg-ink-950/60 z-20 lg:hidden"
                     onClick={() => setMobileOpen(false)}
                 />
             )}
 
             {/* Main */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top bar */}
-                <header className="h-16 bg-white border-b border-surface-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
-                    <div className="flex items-center gap-2">
+                {/* Top bar: same tone as the page, so only the hairline separates it */}
+                <header className="h-16 bg-surface-50 border-b border-surface-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
+                    <div className="flex items-center gap-2 min-w-0">
                         <button
                             onClick={() => setMobileOpen(true)}
                             className="lg:hidden h-9 w-9 flex items-center justify-center rounded-lg text-surface-600 hover:bg-surface-100 transition-colors"
@@ -145,7 +156,15 @@ const AdminLayout: React.FC = () => {
                                 <PanelLeftOpen className="w-4 h-4" strokeWidth={1.5} />
                             )}
                         </button>
-                        <h2 className="text-sm font-medium text-surface-900">Admin console</h2>
+                        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm min-w-0">
+                            <span className="hidden sm:inline text-surface-500">Admin console</span>
+                            {section && (
+                                <>
+                                    <span className="hidden sm:inline text-surface-300" aria-hidden="true">/</span>
+                                    <span className="font-medium text-surface-900 truncate">{section}</span>
+                                </>
+                            )}
+                        </nav>
                     </div>
 
                     <button

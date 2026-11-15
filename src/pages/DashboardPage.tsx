@@ -77,7 +77,7 @@ export const DashboardPage: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-medium text-surface-900">Organization overview</h1>
+                    <h1 className="text-3xl font-medium text-surface-900">Organization overview</h1>
                     <p className="mt-1 text-sm text-surface-500">{today}</p>
                 </div>
                 {!loading && <Status tone={RISK_TONE[level]}>{RISK_LABEL[level]} risk</Status>}
@@ -107,9 +107,11 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Detail panels */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left column: two compact panels, stacked */}
+                <div className="lg:col-span-5 space-y-6">
                 {/* Project status */}
-                <section className="panel p-5 xl:col-span-3">
+                <section className="panel p-5">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-medium text-surface-900">Project status</h2>
                         <Link to="/admin/projects" className="text-xs text-orbit-600 hover:text-orbit-700 transition-colors">
@@ -148,7 +150,7 @@ export const DashboardPage: React.FC = () => {
                 </section>
 
                 {/* Team presence */}
-                <section className="panel p-5 xl:col-span-3">
+                <section className="panel p-5">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-medium text-surface-900">Team presence</h2>
                         <Link to="/admin/employees" className="text-xs text-orbit-600 hover:text-orbit-700 transition-colors">
@@ -180,9 +182,10 @@ export const DashboardPage: React.FC = () => {
                         />
                     </div>
                 </section>
+                </div>
 
                 {/* AI risk: the moment of this screen */}
-                <section className="panel p-5 md:col-span-2 xl:col-span-6">
+                <section className="panel p-6 lg:col-span-7 flex flex-col">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-medium text-surface-900">AI risk</h2>
                         <button
@@ -194,12 +197,12 @@ export const DashboardPage: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="mt-6 flex flex-col sm:flex-row items-center gap-8">
-                        <RiskDial score={summary?.riskScore ?? 0} level={level} loading={loading} />
+                    <div className="flex-1 mt-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
+                        <RiskDial size="lg" score={summary?.riskScore ?? 0} level={level} loading={loading} />
 
-                        <div className="min-w-0 text-center sm:text-left">
+                        <div className="min-w-0 max-w-sm text-center flex flex-col items-center">
                             {!loading && <Status tone={RISK_TONE[level]} className="font-medium text-surface-900">{RISK_LABEL[level]} risk</Status>}
-                            <p className="mt-2 text-sm leading-relaxed text-surface-600 max-w-md">
+                            <p className="mt-2 text-base leading-relaxed text-surface-600">
                                 {loading ? 'Analyzing operational telemetry' : summary?.riskAssessment || 'No assessment available yet'}
                             </p>
                         </div>
