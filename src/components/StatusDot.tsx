@@ -26,7 +26,7 @@ interface StatusProps {
 
 /** Dot + label. Text stays in the neutral ramp, only the dot carries colour. */
 export const Status: React.FC<StatusProps> = ({ tone, children, className = '' }) => (
-    <span className={`inline-flex items-center align-middle gap-2 text-sm leading-5 text-surface-700 whitespace-nowrap ${className}`}>
+    <span className={`flex w-fit items-center gap-2 text-sm leading-5 text-surface-700 whitespace-nowrap ${className}`}>
         <StatusDot tone={tone} />
         {children}
     </span>

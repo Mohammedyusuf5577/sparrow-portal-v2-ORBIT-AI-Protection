@@ -34,6 +34,38 @@ export const formatDate = (value?: string | null): string => {
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+/** "14 Nov 2026, 09:40" */
+export const formatDateTime = (value?: string | null): string => {
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+};
+
+/** "18 Nov – 19 Nov 2026" (year shown once when both dates share it) and the inclusive day count. */
+export const formatRange = (start?: string | null, end?: string | null): { label: string; days: number | null } => {
+    const s = start ? new Date(start) : null;
+    const e = end ? new Date(end) : null;
+    if (!s || !e || Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) {
+        return { label: `${formatDate(start)} – ${formatDate(end)}`, days: null };
+    }
+    const dm = (d: Date) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    const days = Math.round((e.getTime() - s.getTime()) / 86400000) + 1;
+    const label =
+        s.getFullYear() === e.getFullYear()
+            ? `${dm(s)} – ${dm(e)} ${e.getFullYear()}`
+            : `${formatDate(start)} – ${formatDate(end)}`;
+    return { label, days: days > 0 ? days : null };
+};
+
+/** Clock time "09:05". Accepts an ISO date-time; anything else is shown as it came in. */
+export const formatTime = (value?: string | null): string => {
+    if (!value) return '—';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+};
+
 /** Indian rupee amount with grouping: "₹38,500". Keeps paise only when present. */
 export const formatINR = (value?: number | null): string => {
     if (value === undefined || value === null || Number.isNaN(value)) return '—';

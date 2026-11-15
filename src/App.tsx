@@ -22,7 +22,7 @@ const ProjectEditPage = lazy(() => import('./pages/ProjectEditPage'));
 
 const PageFallback = () => (
     <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-3 border-orbit-200 border-t-orbit-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-surface-200 border-t-orbit-600 rounded-full animate-spin" />
     </div>
 );
 

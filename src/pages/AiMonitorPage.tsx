@@ -3,18 +3,11 @@ import { getAiSummary, getNotifications, markNotificationRead } from '../api/ser
 import type { AiSummary, Notification } from '../types';
 import { usePagination } from '../hooks/usePagination';
 import { PaginatedPanel } from '../components/PaginatedPanel';
-import {
-    Brain,
-    AlertTriangle,
-    Activity,
-    TrendingUp,
-    Users,
-    FolderKanban,
-    CalendarOff,
-    Eye,
-    Bell,
-    CheckCircle,
-} from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { RiskDial, RISK_LABEL, RISK_TONE, toRiskLevel } from '../components/RiskDial';
+import { Status, StatusDot, type StatusTone } from '../components/StatusDot';
+import { formatDateTime } from '../components/ui';
+import { Bell } from 'lucide-react';
 
 const AiMonitorPage: React.FC = () => {
     const [summary, setSummary] = useState<AiSummary | null>(null);
@@ -54,118 +47,86 @@ const AiMonitorPage: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="w-10 h-10 border-3 border-orbit-200 border-t-orbit-600 rounded-full animate-spin" />
+                <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-surface-200 border-t-orbit-600 rounded-full animate-spin" />
             </div>
         );
     }
 
-    const riskColor =
-        summary?.riskLevel === 'HIGH' ? 'rose' : summary?.riskLevel === 'MEDIUM' ? 'amber' : 'emerald';
+    const level = toRiskLevel(summary?.riskLevel);
 
-    const factors = [
-        {
-            label: 'Delayed Projects',
-            value: summary?.delayedProjects || 0,
-            impact: (summary?.delayedProjects || 0) * 10,
-            icon: AlertTriangle,
-            color: 'accent-rose',
-        },
-        {
-            label: 'Pending Leaves',
-            value: summary?.pendingLeaves || 0,
-            impact: (summary?.pendingLeaves || 0) * 5,
-            icon: CalendarOff,
-            color: 'accent-amber',
-        },
-        {
-            label: 'Attendance Anomalies',
-            value: summary?.attendanceAnomalies || 0,
-            impact: (summary?.attendanceAnomalies || 0) * 5,
-            icon: Activity,
-            color: 'accent-violet',
-        },
+    // What the risk score is made of. Weights are the ones the score already uses.
+    const factors: { label: string; value: number; weight: number; tone: StatusTone; bar: string }[] = [
+        { label: 'Delayed projects', value: summary?.delayedProjects || 0, weight: 10, tone: 'negative', bar: 'bg-accent-rose' },
+        { label: 'Pending leaves', value: summary?.pendingLeaves || 0, weight: 5, tone: 'warning', bar: 'bg-amber-600' },
+        { label: 'Attendance anomalies', value: summary?.attendanceAnomalies || 0, weight: 5, tone: 'active', bar: 'bg-orbit-600' },
     ];
+
+    const context = [
+        { label: 'Active staff', value: summary?.activeEmployees || 0 },
+        { label: 'Total projects', value: summary?.totalProjects || 0 },
+        { label: 'Completed projects', value: summary?.completedProjects || 0 },
+    ];
+
+    const unread = notifications.filter((n) => !n.read).length;
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orbit-500 to-orbit-600 flex items-center justify-center">
-                    <Brain className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                    <h1 className="text-2xl font-medium text-surface-900">AI Monitor</h1>
-                    <p className="text-sm text-surface-500">Intelligent risk detection & analysis</p>
-                </div>
-            </div>
+            <PageHeader title="AI monitor" description="Risk detection and analysis" />
 
-            {/* Risk Score Card */}
-            <div className={`bg-gradient-to-r ${riskColor === 'rose' ? 'from-rose-500 to-rose-700' :
-                    riskColor === 'amber' ? 'from-amber-500 to-orange-600' :
-                        'from-emerald-500 to-emerald-700'
-                } rounded-xl p-8 text-white shadow-elevated`}>
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        <p className="text-sm font-medium text-white/80 mb-1">Overall Risk Assessment</p>
-                        <h2 className="text-5xl font-medium mb-2">{summary?.riskScore || 0}<span className="text-2xl font-normal text-white/60">/100</span></h2>
-                        <p className="text-lg font-medium">{summary?.riskLevel} Risk Level</p>
+            {/* Overall risk: the one rich element on this screen */}
+            <section className="panel p-6">
+                <h2 className="text-sm font-medium text-surface-900">Overall risk assessment</h2>
+                <div className="mt-6 flex flex-col lg:flex-row items-center justify-between gap-8">
+                    <div className="flex flex-col sm:flex-row items-center gap-8">
+                        <RiskDial score={summary?.riskScore || 0} level={level} />
+                        <div className="text-center sm:text-left">
+                            <Status tone={RISK_TONE[level]} className="font-medium text-surface-900">
+                                {RISK_LABEL[level]} risk
+                            </Status>
+                            <p className="mt-2 text-sm text-surface-600 max-w-xs">
+                                Built from the three factors below. Each count is multiplied by its weight.
+                            </p>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-6">
-                        {[
-                            { label: 'Active Staff', value: summary?.activeEmployees || 0, icon: Users },
-                            { label: 'Total Projects', value: summary?.totalProjects || 0, icon: FolderKanban },
-                            { label: 'Completed', value: summary?.completedProjects || 0, icon: CheckCircle },
-                        ].map((stat, i) => (
-                            <div key={i} className="text-center">
-                                <stat.icon className="w-5 h-5 mx-auto mb-1.5 text-white/70" />
-                                <p className="text-2xl font-medium">{stat.value}</p>
-                                <p className="text-xs text-white/60">{stat.label}</p>
+
+                    <dl className="grid grid-cols-3 gap-8 lg:gap-10">
+                        {context.map((item) => (
+                            <div key={item.label}>
+                                <dd className="text-2xl font-medium leading-none text-surface-900 tabular-nums">{item.value}</dd>
+                                <dt className="mt-2 text-sm text-surface-500">{item.label}</dt>
                             </div>
                         ))}
-                    </div>
+                    </dl>
                 </div>
-            </div>
+            </section>
 
-            {/* Risk Factors Breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {factors.map((factor, i) => (
-                    <div
-                        key={i}
-                        className="bg-white rounded-xl p-6 shadow-card border border-surface-100"
-                        style={{ animationDelay: `${i * 0.1}s` }}
-                    >
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-10 h-10 rounded-lg bg-${factor.color}/10 flex items-center justify-center`}>
-                                <factor.icon className={`w-5 h-5 text-${factor.color}`} />
+            {/* Factors */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {factors.map((factor) => {
+                    const impact = factor.value * factor.weight;
+                    return (
+                        <div key={factor.label} className="panel p-5">
+                            <p className="flex items-center gap-2 h-5 text-sm text-surface-600">
+                                <StatusDot tone={factor.tone} />
+                                {factor.label}
+                            </p>
+                            <p className="mt-2 text-3xl font-medium leading-none text-surface-900 tabular-nums">{factor.value}</p>
+
+                            <div className="mt-5 flex items-center justify-between text-sm">
+                                <span className="text-surface-600">Impact on score</span>
+                                <span className="font-medium text-surface-900 tabular-nums">+{impact}</span>
                             </div>
-                            <div>
-                                <p className="text-sm font-medium text-surface-800">{factor.label}</p>
-                                <p className="text-xs text-surface-400">Count: {factor.value}</p>
+                            <div className="mt-2 h-1.5 rounded-full bg-surface-100 overflow-hidden">
+                                <div className={`h-full rounded-full ${factor.bar}`} style={{ width: `${Math.min(impact, 100)}%` }} />
                             </div>
+                            <p className="mt-3 text-xs text-surface-500">Count × {factor.weight}</p>
                         </div>
-                        <div className="mb-2">
-                            <div className="flex justify-between text-xs mb-1">
-                                <span className="text-surface-500">Impact Score</span>
-                                <span className="font-medium text-surface-700">+{factor.impact}</span>
-                            </div>
-                            <div className="h-2 bg-surface-100 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full bg-${factor.color} rounded-full transition-colors duration-150 ease-out`}
-                                    style={{ width: `${Math.min((factor.impact / 100) * 100, 100)}%` }}
-                                />
-                            </div>
-                        </div>
-                        <p className="text-xs text-surface-400">
-                            Formula: {factor.label === 'Delayed Projects' ? 'Count × 10' : 'Count × 5'}
-                        </p>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Notifications */}
             <PaginatedPanel
-                className=""
-                style={{ animationDelay: '0.3s' }}
                 minBodyHeightClass="min-h-[16rem]"
                 isEmpty={notifications.length === 0}
                 empty={{
@@ -174,48 +135,39 @@ const AiMonitorPage: React.FC = () => {
                     description: 'AI risk alerts and system notifications will appear here.',
                 }}
                 pagination={paginationProps}
-                bodyClassName="divide-y divide-surface-50"
+                bodyClassName="divide-y divide-surface-100"
                 header={
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-surface-100">
-                        <div className="flex items-center gap-3">
-                            <Bell className="w-5 h-5 text-orbit-600" />
-                            <h3 className="text-sm font-medium text-surface-800">AI Alerts & Notifications</h3>
-                        </div>
-                        <span className="text-xs text-surface-400">
-                            {notifications.filter((n) => !n.read).length} unread
-                        </span>
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200">
+                        <h3 className="text-sm font-medium text-surface-900">Alerts and notifications</h3>
+                        <span className="text-xs text-surface-500 tabular-nums">{unread} unread</span>
                     </div>
                 }
             >
                 {pageItems.map((notif) => (
                     <div
                         key={notif.id}
-                        className={`flex items-start gap-4 px-6 py-4 transition-colors ${!notif.read ? 'bg-orbit-50/30' : 'hover:bg-surface-50'
-                            }`}
+                        className="flex items-start gap-3 px-5 py-4 hover:bg-surface-50 transition-colors duration-150"
                     >
-                        <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center ${notif.type === 'RISK_ALERT' ? 'bg-accent-rose/10' : 'bg-orbit-50'
-                            }`}>
-                            {notif.type === 'RISK_ALERT' ? (
-                                <AlertTriangle className="w-4 h-4 text-accent-rose" />
+                        <span className="flex items-center h-5 flex-shrink-0">
+                            {notif.read ? (
+                                <span className="inline-block w-1.5 h-1.5 rounded-full border border-surface-300" aria-hidden="true" />
                             ) : (
-                                <Activity className="w-4 h-4 text-orbit-600" />
+                                <StatusDot tone={notif.type === 'RISK_ALERT' ? 'negative' : 'active'} />
                             )}
-                        </div>
+                        </span>
                         <div className="flex-1 min-w-0">
-                            <p className={`text-sm ${!notif.read ? 'font-semibold text-surface-900' : 'text-surface-600'}`}>
+                            <p className={`text-sm ${notif.read ? 'text-surface-600' : 'font-medium text-surface-900'}`}>
                                 {notif.message}
+                                {!notif.read && <span className="sr-only"> (unread)</span>}
                             </p>
-                            <p className="text-xs text-surface-400 mt-1">
-                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
-                            </p>
+                            <p className="mt-0.5 text-xs text-surface-500 tabular-nums">{formatDateTime(notif.createdAt)}</p>
                         </div>
                         {!notif.read && (
                             <button
                                 onClick={() => handleMarkRead(notif.id)}
-                                className="flex-shrink-0 p-1.5 rounded-lg text-orbit-500 hover:bg-orbit-100 transition-colors"
-                                title="Mark as read"
+                                className="flex-shrink-0 h-8 px-3 rounded-lg text-sm text-orbit-600 hover:bg-orbit-50 transition-colors duration-150"
                             >
-                                <Eye className="w-4 h-4" />
+                                Mark as read
                             </button>
                         )}
                     </div>

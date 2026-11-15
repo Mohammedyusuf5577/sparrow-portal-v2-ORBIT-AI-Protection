@@ -3,74 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDashboard } from '../hooks/useDashboard';
 import { ArrowUpRight, RotateCcw } from 'lucide-react';
 import { Status, StatusDot, type StatusTone } from '../components/StatusDot';
-
-type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
-
-const RISK_TONE: Record<RiskLevel, StatusTone> = { LOW: 'positive', MEDIUM: 'warning', HIGH: 'negative' };
-const RISK_STROKE: Record<RiskLevel, string> = { LOW: '#16a34a', MEDIUM: '#d97706', HIGH: '#dc2626' };
-const RISK_LABEL: Record<RiskLevel, string> = { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High' };
-
-/** The one rich element on this screen: the AI risk index drawn as an instrument dial. */
-const RiskDial: React.FC<{ score: number; level: RiskLevel; loading: boolean }> = ({ score, level, loading }) => {
-    const R = 96;
-    const cx = 120;
-    const cy = 120;
-    const arc = `M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`;
-    const clamped = Math.max(0, Math.min(100, score));
-    const ticks = Array.from({ length: 11 }, (_, i) => {
-        const a = Math.PI - (i / 10) * Math.PI;
-        const major = i % 5 === 0;
-        const r1 = R + 10;
-        const r2 = R + (major ? 20 : 15);
-        return {
-            key: i,
-            x1: cx + r1 * Math.cos(a),
-            y1: cy - r1 * Math.sin(a),
-            x2: cx + r2 * Math.cos(a),
-            y2: cy - r2 * Math.sin(a),
-            major,
-        };
-    });
-
-    return (
-        <div
-            className="relative w-[240px] h-[148px] flex-shrink-0"
-            role="img"
-            aria-label={loading ? 'AI risk score loading' : `AI risk score ${score} out of 100, ${RISK_LABEL[level].toLowerCase()}`}
-        >
-            <svg viewBox="0 0 240 148" className="w-full h-full overflow-visible">
-                {ticks.map((t) => (
-                    <line
-                        key={t.key}
-                        x1={t.x1}
-                        y1={t.y1}
-                        x2={t.x2}
-                        y2={t.y2}
-                        stroke={t.major ? '#a1a1aa' : '#d4d4d8'}
-                        strokeWidth={1}
-                    />
-                ))}
-                <path d={arc} fill="none" stroke="#e8e8ea" strokeWidth={10} strokeLinecap="round" pathLength={100} />
-                {!loading && clamped > 0 && (
-                    <path
-                        d={arc}
-                        fill="none"
-                        stroke={RISK_STROKE[level]}
-                        strokeWidth={10}
-                        strokeLinecap="round"
-                        pathLength={100}
-                        strokeDasharray={`${clamped} 100`}
-                        style={{ transition: 'stroke-dasharray 600ms cubic-bezier(0.22, 1, 0.36, 1)' }}
-                    />
-                )}
-            </svg>
-            <div className="absolute inset-x-0 bottom-0 flex flex-col items-center">
-                <span className="text-4xl font-medium leading-none text-surface-900 tabular-nums">{loading ? '—' : score}</span>
-                <span className="mt-1.5 text-xs text-surface-500">out of 100</span>
-            </div>
-        </div>
-    );
-};
+import { RiskDial, RISK_LABEL, RISK_TONE, toRiskLevel } from '../components/RiskDial';
 
 const StatCard: React.FC<{
     label: string;
@@ -124,7 +57,7 @@ export const DashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const { summary, loading, error, refetch } = useDashboard();
 
-    const level: RiskLevel = (summary?.riskLevel as RiskLevel) || 'LOW';
+    const level = toRiskLevel(summary?.riskLevel);
     const today = new Date().toLocaleDateString('en-IN', {
         weekday: 'long',
         day: 'numeric',
