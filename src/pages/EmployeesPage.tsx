@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { getEmployees, getInstructors, createEmployee, updateEmployee, deleteEmployee } from '../api/services';
 import type { User } from '../types';
+import { usePagination } from '../hooks/usePagination';
+import { PaginatedPanel } from '../components/PaginatedPanel';
 import { Users, UserCheck, Search, Mail, Shield, Clock, Eye, Edit2, Plus, ListFilter, Trash2, ArrowLeft, UserPlus, AlertCircle } from 'lucide-react';
 
 const EmployeesPage: React.FC = () => {
@@ -36,6 +38,9 @@ const EmployeesPage: React.FC = () => {
             u.fullName.toLowerCase().includes(search.toLowerCase()) ||
             u.email.toLowerCase().includes(search.toLowerCase())
     );
+
+    // Client-side pagination (back to page 1 when the tab or search changes)
+    const { pageItems, paginationProps } = usePagination(filtered, { resetKey: `${tab}|${search}` });
 
     const statusColors: Record<string, string> = {
         ACTIVE: 'bg-accent-emerald/10 text-accent-emerald border-emerald-200',
@@ -298,118 +303,112 @@ const EmployeesPage: React.FC = () => {
             </div>
 
             {/* Table */}
-            {loading ? (
-                <div className="flex items-center justify-center h-40">
-                    <div className="w-8 h-8 border-3 border-orbit-200 border-t-orbit-600 rounded-full animate-spin" />
-                </div>
-            ) : (
-                <div className="bg-white rounded-2xl shadow-card overflow-hidden border border-surface-100">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-surface-50 border-b border-surface-100">
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Name</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Email</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Role</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Status</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Joined</th>
-                                    <th className="text-right text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-surface-50">
-                                {filtered.map((user, i) => (
-                                    <tr
-                                        key={user.id}
-                                        className="hover:bg-orbit-50/30 transition-colors animate-slide-up"
-                                        style={{ animationDelay: `${i * 0.03}s` }}
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-9 h-9 rounded-xl ${tab === 'employees'
-                                                    ? 'bg-gradient-to-br from-orbit-500 to-orbit-700'
-                                                    : 'bg-gradient-to-br from-accent-violet to-purple-700'
-                                                    } flex items-center justify-center text-white text-sm font-bold`}>
-                                                    {user.fullName.charAt(0)}
-                                                </div>
-                                                <span className="text-sm font-semibold text-surface-900">{user.fullName}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="flex items-center gap-1.5 text-sm text-surface-500">
-                                                <Mail className="w-3.5 h-3.5" /> {user.email}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="flex items-center gap-1.5 text-sm text-surface-600">
-                                                <Shield className="w-3.5 h-3.5" /> {user.role}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusColors[user.status]}`}>
-                                                {user.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="flex items-center gap-1.5 text-sm text-surface-400">
-                                                <Clock className="w-3.5 h-3.5" />
-                                                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedUser(user);
-                                                        setViewMode('view');
-                                                        setFormError(null);
-                                                    }}
-                                                    className="p-1.5 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-all"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="w-4.5 h-4.5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedUser({ ...user });
-                                                        setViewMode('edit');
-                                                        setFormError(null);
-                                                    }}
-                                                    className="p-1.5 text-surface-400 hover:text-accent-violet hover:bg-violet-50 rounded-lg transition-all"
-                                                    title="Edit Details"
-                                                >
-                                                    <Edit2 className="w-4.5 h-4.5" />
-                                                </button>
-                                                <button
-                                                    onClick={async () => {
-                                                        if (confirm(`Are you sure you want to delete ${user.fullName}?`)) {
-                                                            try {
-                                                                await deleteEmployee(user.id);
-                                                                fetchData();
-                                                            } catch (err) {
-                                                                console.error(err);
-                                                            }
-                                                        }
-                                                    }}
-                                                    className="p-1.5 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="w-4.5 h-4.5" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {filtered.length === 0 && (
-                        <div className="text-center py-12">
-                            <Users className="w-10 h-10 mx-auto text-surface-300 mb-2" />
-                            <p className="text-surface-500 text-sm">No members found</p>
-                        </div>
-                    )}
-                </div>
-            )}
+            <PaginatedPanel
+                loading={loading}
+                isEmpty={filtered.length === 0}
+                empty={{
+                    icon: Users,
+                    title: search ? 'No members match your search' : 'No members found',
+                    description: search
+                        ? 'Try a different name or email.'
+                        : `There are no ${tab} to display yet. Use the Add button to create one.`,
+                }}
+                pagination={paginationProps}
+                tbodyClassName="divide-y divide-surface-50"
+                tableHead={
+                    <tr className="bg-surface-50 border-b border-surface-100">
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Name</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Email</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Role</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Status</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Joined</th>
+                        <th className="text-right text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3.5">Actions</th>
+                    </tr>
+                }
+            >
+                {pageItems.map((user, i) => (
+                    <tr
+                        key={user.id}
+                        className="hover:bg-orbit-50/30 transition-colors animate-slide-up"
+                        style={{ animationDelay: `${i * 0.03}s` }}
+                    >
+                        <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-9 h-9 rounded-xl ${tab === 'employees'
+                                    ? 'bg-gradient-to-br from-orbit-500 to-orbit-700'
+                                    : 'bg-gradient-to-br from-accent-violet to-purple-700'
+                                    } flex items-center justify-center text-white text-sm font-bold`}>
+                                    {user.fullName.charAt(0)}
+                                </div>
+                                <span className="text-sm font-semibold text-surface-900">{user.fullName}</span>
+                            </div>
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className="flex items-center gap-1.5 text-sm text-surface-500">
+                                <Mail className="w-3.5 h-3.5" /> {user.email}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className="flex items-center gap-1.5 text-sm text-surface-600">
+                                <Shield className="w-3.5 h-3.5" /> {user.role}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusColors[user.status]}`}>
+                                {user.status}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className="flex items-center gap-1.5 text-sm text-surface-400">
+                                <Clock className="w-3.5 h-3.5" />
+                                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                                <button
+                                    onClick={() => {
+                                        setSelectedUser(user);
+                                        setViewMode('view');
+                                        setFormError(null);
+                                    }}
+                                    className="p-1.5 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-all"
+                                    title="View Details"
+                                >
+                                    <Eye className="w-4.5 h-4.5" />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setSelectedUser({ ...user });
+                                        setViewMode('edit');
+                                        setFormError(null);
+                                    }}
+                                    className="p-1.5 text-surface-400 hover:text-accent-violet hover:bg-violet-50 rounded-lg transition-all"
+                                    title="Edit Details"
+                                >
+                                    <Edit2 className="w-4.5 h-4.5" />
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        if (confirm(`Are you sure you want to delete ${user.fullName}?`)) {
+                                            try {
+                                                await deleteEmployee(user.id);
+                                                fetchData();
+                                            } catch (err) {
+                                                console.error(err);
+                                            }
+                                        }
+                                    }}
+                                    className="p-1.5 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                    title="Delete"
+                                >
+                                    <Trash2 className="w-4.5 h-4.5" />
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </PaginatedPanel>
         </div>
     );
 };

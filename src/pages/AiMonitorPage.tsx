@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { getAiSummary, getNotifications, markNotificationRead } from '../api/services';
 import type { AiSummary, Notification } from '../types';
+import { usePagination } from '../hooks/usePagination';
+import { PaginatedPanel } from '../components/PaginatedPanel';
 import {
     Brain,
     AlertTriangle,
@@ -45,6 +47,9 @@ const AiMonitorPage: React.FC = () => {
             console.error(err);
         }
     };
+
+    // Client-side pagination for the notifications list
+    const { pageItems, paginationProps } = usePagination(notifications);
 
     if (loading) {
         return (
@@ -158,59 +163,64 @@ const AiMonitorPage: React.FC = () => {
             </div>
 
             {/* Notifications */}
-            <div className="bg-white rounded-2xl shadow-card border border-surface-100 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-surface-100">
-                    <div className="flex items-center gap-3">
-                        <Bell className="w-5 h-5 text-orbit-600" />
-                        <h3 className="text-sm font-bold text-surface-800">AI Alerts & Notifications</h3>
-                    </div>
-                    <span className="text-xs text-surface-400">
-                        {notifications.filter((n) => !n.read).length} unread
-                    </span>
-                </div>
-                <div className="divide-y divide-surface-50 max-h-80 overflow-y-auto">
-                    {notifications.length > 0 ? (
-                        notifications.map((notif) => (
-                            <div
-                                key={notif.id}
-                                className={`flex items-start gap-4 px-6 py-4 transition-colors ${!notif.read ? 'bg-orbit-50/30' : 'hover:bg-surface-50'
-                                    }`}
-                            >
-                                <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center ${notif.type === 'RISK_ALERT' ? 'bg-accent-rose/10' : 'bg-orbit-50'
-                                    }`}>
-                                    {notif.type === 'RISK_ALERT' ? (
-                                        <AlertTriangle className="w-4 h-4 text-accent-rose" />
-                                    ) : (
-                                        <Activity className="w-4 h-4 text-orbit-600" />
-                                    )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className={`text-sm ${!notif.read ? 'font-semibold text-surface-900' : 'text-surface-600'}`}>
-                                        {notif.message}
-                                    </p>
-                                    <p className="text-xs text-surface-400 mt-1">
-                                        {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
-                                    </p>
-                                </div>
-                                {!notif.read && (
-                                    <button
-                                        onClick={() => handleMarkRead(notif.id)}
-                                        className="flex-shrink-0 p-1.5 rounded-lg text-orbit-500 hover:bg-orbit-100 transition-colors"
-                                        title="Mark as read"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                    </button>
-                                )}
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-center py-12">
-                            <Bell className="w-10 h-10 mx-auto text-surface-300 mb-2" />
-                            <p className="text-surface-500 text-sm">No notifications yet</p>
+            <PaginatedPanel
+                className="animate-slide-up"
+                style={{ animationDelay: '0.3s' }}
+                minBodyHeightClass="min-h-[16rem]"
+                isEmpty={notifications.length === 0}
+                empty={{
+                    icon: Bell,
+                    title: 'No notifications yet',
+                    description: 'AI risk alerts and system notifications will appear here.',
+                }}
+                pagination={paginationProps}
+                bodyClassName="divide-y divide-surface-50"
+                header={
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-surface-100">
+                        <div className="flex items-center gap-3">
+                            <Bell className="w-5 h-5 text-orbit-600" />
+                            <h3 className="text-sm font-bold text-surface-800">AI Alerts & Notifications</h3>
                         </div>
-                    )}
-                </div>
-            </div>
+                        <span className="text-xs text-surface-400">
+                            {notifications.filter((n) => !n.read).length} unread
+                        </span>
+                    </div>
+                }
+            >
+                {pageItems.map((notif) => (
+                    <div
+                        key={notif.id}
+                        className={`flex items-start gap-4 px-6 py-4 transition-colors ${!notif.read ? 'bg-orbit-50/30' : 'hover:bg-surface-50'
+                            }`}
+                    >
+                        <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center ${notif.type === 'RISK_ALERT' ? 'bg-accent-rose/10' : 'bg-orbit-50'
+                            }`}>
+                            {notif.type === 'RISK_ALERT' ? (
+                                <AlertTriangle className="w-4 h-4 text-accent-rose" />
+                            ) : (
+                                <Activity className="w-4 h-4 text-orbit-600" />
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className={`text-sm ${!notif.read ? 'font-semibold text-surface-900' : 'text-surface-600'}`}>
+                                {notif.message}
+                            </p>
+                            <p className="text-xs text-surface-400 mt-1">
+                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
+                            </p>
+                        </div>
+                        {!notif.read && (
+                            <button
+                                onClick={() => handleMarkRead(notif.id)}
+                                className="flex-shrink-0 p-1.5 rounded-lg text-orbit-500 hover:bg-orbit-100 transition-colors"
+                                title="Mark as read"
+                            >
+                                <Eye className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+                ))}
+            </PaginatedPanel>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { AuthResponse } from '../types';
 
 interface AuthContextType {
@@ -11,38 +11,81 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<AuthResponse | null>(null);
-    const [token, setToken] = useState<string | null>(null);
+const TOKEN_KEY = 'orbit_token';
+const USER_KEY = 'orbit_user';
 
-    useEffect(() => {
-        const savedToken = localStorage.getItem('orbit_token');
-        const savedUser = localStorage.getItem('orbit_user');
-        if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
+interface Session {
+    token: string | null;
+    user: AuthResponse | null;
+}
+
+const EMPTY_SESSION: Session = { token: null, user: null };
+
+/**
+ * True only when the JWT carries an `exp` that is already in the past.
+ * Anything unreadable is left for the server to judge (the 401 interceptor handles it).
+ */
+const isTokenExpired = (token: string): boolean => {
+    try {
+        const payload = token.split('.')[1];
+        if (!payload) return false;
+        const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+        return typeof claims.exp === 'number' && claims.exp * 1000 <= Date.now();
+    } catch {
+        return false;
+    }
+};
+
+const clearStoredSession = () => {
+    try {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+    } catch {
+        /* storage unavailable */
+    }
+};
+
+/**
+ * Restores the saved session SYNCHRONOUSLY.
+ *
+ * It has to be ready on the very first render: ProtectedRoute decides on that render, so restoring
+ * the session later in an effect sent every page refresh to the login page.
+ * Corrupted, partial or expired data is discarded so the app never keeps half a session.
+ */
+const readSavedSession = (): Session => {
+    try {
+        const token = localStorage.getItem(TOKEN_KEY);
+        const rawUser = localStorage.getItem(USER_KEY);
+        if (token && rawUser && !isTokenExpired(token)) {
+            return { token, user: JSON.parse(rawUser) as AuthResponse };
         }
+    } catch {
+        /* corrupted JSON or storage blocked: fall through and start logged out */
+    }
+    clearStoredSession();
+    return EMPTY_SESSION;
+};
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [session, setSession] = useState<Session>(readSavedSession);
+
+    const login = useCallback((data: AuthResponse) => {
+        setSession({ token: data.token, user: data });
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(data));
     }, []);
 
-    const login = (data: AuthResponse) => {
-        setUser(data);
-        setToken(data.token);
-        localStorage.setItem('orbit_token', data.token);
-        localStorage.setItem('orbit_user', JSON.stringify(data));
-    };
+    const logout = useCallback(() => {
+        setSession(EMPTY_SESSION);
+        clearStoredSession();
+    }, []);
 
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('orbit_token');
-        localStorage.removeItem('orbit_user');
-    };
-
-    return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
-            {children}
-        </AuthContext.Provider>
+    const value = useMemo<AuthContextType>(
+        () => ({ user: session.user, token: session.token, login, logout, isAuthenticated: !!session.token }),
+        [session, login, logout]
     );
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {

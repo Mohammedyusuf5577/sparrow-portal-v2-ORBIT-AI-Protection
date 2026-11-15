@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '../hooks/useProjects';
+import { usePageOverflowGuard } from '../hooks/usePagination';
 import { softDeleteProject } from '../api/services';
-import type { Project, ProjectStatusType } from '../types';
+import type { Project, ProjectStatusType, PaginationControls } from '../types';
 import { StatusChip } from '../components/StatusChip';
-import { Pagination } from '../components/Pagination';
+import { PaginatedGrid, PaginatedPanel } from '../components/PaginatedPanel';
+import type { EmptyStateProps } from '../components/EmptyState';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { ConfirmDialog } from '../components/ConfirmDialog';
-import { ProjectAnalyticsStrip } from '../components/ProjectAnalyticsStrip';
 import {
     Plus,
     Search,
@@ -41,6 +42,17 @@ export const ProjectsPage: React.FC = () => {
         updateParams,
         refetch,
     } = useProjects();
+
+    // If the requested page no longer exists (last row deleted, stale ?page=... in the URL),
+    // move to the last valid page instead of leaving the user on an empty one.
+    const goToPage = useCallback((p: number) => updateParams({ page: p }), [updateParams]);
+    usePageOverflowGuard({
+        page,
+        totalPages: meta.totalPages,
+        totalItems: meta.totalItems,
+        loading,
+        onPageChange: goToPage,
+    });
 
     // View mode stored in localStorage
     const [viewMode, setViewMode] = useState<'grid' | 'table'>(() => {
@@ -125,6 +137,45 @@ export const ProjectsPage: React.FC = () => {
     const hasActiveFilters = Boolean(search || status || month || year);
     const currentYear = new Date().getFullYear();
 
+    // Year filter options: next year back to 5 years ago (+ the selected year if it is outside that range)
+    const yearOptions = Array.from({ length: 7 }, (_, i) => currentYear + 1 - i);
+    if (year !== '' && !yearOptions.includes(Number(year))) {
+        yearOptions.push(Number(year));
+        yearOptions.sort((a, b) => b - a);
+    }
+
+    const paginationProps: PaginationControls = {
+        page,
+        limit,
+        totalItems: meta.totalItems,
+        totalPages: meta.totalPages,
+        onPageChange: goToPage,
+        onLimitChange: (l) => updateParams({ limit: l, page: 1 }),
+    };
+
+    const emptyState: EmptyStateProps = {
+        icon: FolderKanban,
+        title: hasActiveFilters ? 'No projects match your filter' : 'No projects created yet',
+        description: hasActiveFilters
+            ? 'Try adjusting your search query, status, or date range to find what you are looking for.'
+            : 'Get started by creating your first organizational project and assign employees.',
+        action: hasActiveFilters ? (
+            <button
+                onClick={handleResetFilters}
+                className="px-4 py-2 border border-surface-200 rounded-xl text-xs font-semibold text-surface-700 hover:bg-surface-50"
+            >
+                Clear all filters
+            </button>
+        ) : (
+            <button
+                onClick={() => navigate('/admin/projects/new')}
+                className="px-5 py-2.5 bg-gradient-orbit text-white text-xs font-semibold rounded-xl shadow-sm"
+            >
+                + Create First Project
+            </button>
+        ),
+    };
+
     return (
         <div className="space-y-6 pb-12 animate-fade-in">
             {/* Header */}
@@ -145,12 +196,6 @@ export const ProjectsPage: React.FC = () => {
                     New Project
                 </button>
             </div>
-
-            {/* Analytics Strip with Year Selector */}
-            <ProjectAnalyticsStrip
-                year={Number(year) || currentYear}
-                onYearChange={(y) => updateParams({ year: y, page: 1 })}
-            />
 
             {/* Filter & Controls Toolbar */}
             <div className="bg-white rounded-2xl border border-surface-200 p-4 shadow-card space-y-4">
@@ -261,6 +306,20 @@ export const ProjectsPage: React.FC = () => {
                     {/* Month and Reset Filters */}
                     <div className="flex items-center gap-2">
                         <select
+                            value={year}
+                            onChange={(e) => handleYearFilter(e.target.value)}
+                            aria-label="Filter by year"
+                            className="bg-surface-50 border border-surface-200 rounded-lg px-2.5 py-1.5 text-xs text-surface-700 font-medium focus:outline-none focus:ring-2 focus:ring-orbit-500/20 cursor-pointer"
+                        >
+                            <option value="">All Years</option>
+                            {yearOptions.map((y) => (
+                                <option key={y} value={y}>
+                                    {y}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
                             value={month}
                             onChange={(e) => handleMonthFilter(e.target.value)}
                             className="bg-surface-50 border border-surface-200 rounded-lg px-2.5 py-1.5 text-xs text-surface-700 font-medium focus:outline-none focus:ring-2 focus:ring-orbit-500/20 cursor-pointer"
@@ -301,9 +360,7 @@ export const ProjectsPage: React.FC = () => {
             </div>
 
             {/* Main Content Area */}
-            {loading && projects.length === 0 ? (
-                <SkeletonCard variant={viewMode === 'table' ? 'grid' : 'grid'} count={6} />
-            ) : error && projects.length === 0 ? (
+            {error && projects.length === 0 ? (
                 <div className="p-8 text-center bg-white rounded-2xl border border-rose-200 shadow-card">
                     <p className="text-sm font-semibold text-rose-600">{error}</p>
                     <button
@@ -313,40 +370,16 @@ export const ProjectsPage: React.FC = () => {
                         Try Again
                     </button>
                 </div>
-            ) : projects.length === 0 ? (
-                <div className="p-12 text-center bg-white rounded-2xl border border-surface-200 shadow-card space-y-4">
-                    <div className="w-14 h-14 bg-orbit-50 text-orbit-600 rounded-2xl flex items-center justify-center mx-auto">
-                        <FolderKanban className="w-7 h-7" />
-                    </div>
-                    <div>
-                        <h3 className="text-base font-bold text-surface-900">
-                            {hasActiveFilters ? 'No projects match your filter' : 'No projects created yet'}
-                        </h3>
-                        <p className="text-sm text-surface-500 mt-1 max-w-sm mx-auto">
-                            {hasActiveFilters
-                                ? 'Try adjusting your search query, status, or date range to find what you are looking for.'
-                                : 'Get started by creating your first organizational project and assign employees.'}
-                        </p>
-                    </div>
-                    {hasActiveFilters ? (
-                        <button
-                            onClick={handleResetFilters}
-                            className="px-4 py-2 border border-surface-200 rounded-xl text-xs font-semibold text-surface-700 hover:bg-surface-50"
-                        >
-                            Clear all filters
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => navigate('/admin/projects/new')}
-                            className="px-5 py-2.5 bg-gradient-orbit text-white text-xs font-semibold rounded-xl shadow-sm"
-                        >
-                            + Create First Project
-                        </button>
-                    )}
-                </div>
             ) : viewMode === 'grid' ? (
                 /* Grid View */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <PaginatedGrid
+                    gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    loading={loading}
+                    isEmpty={projects.length === 0}
+                    loadingFallback={<SkeletonCard variant="grid" count={6} />}
+                    empty={emptyState}
+                    pagination={paginationProps}
+                >
                     {projects.map((project) => (
                         <div
                             key={project.id}
@@ -412,88 +445,79 @@ export const ProjectsPage: React.FC = () => {
                             </div>
                         </div>
                     ))}
-                </div>
+                </PaginatedGrid>
             ) : (
                 /* Table View */
-                <div className="bg-white rounded-2xl border border-surface-200 shadow-card overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-surface-50 border-b border-surface-200 text-surface-600 text-xs font-bold uppercase tracking-wider">
-                                    <th className="py-3.5 px-4">Project & Client</th>
-                                    <th className="py-3.5 px-4">Status</th>
-                                    <th className="py-3.5 px-4">Timeline</th>
-                                    <th className="py-3.5 px-4">Team</th>
-                                    <th className="py-3.5 px-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-surface-100 text-sm">
-                                {projects.map((project) => (
-                                    <tr
-                                        key={project.id}
-                                        className="hover:bg-surface-50/80 transition-colors"
+                <PaginatedPanel
+                    loading={loading}
+                    isEmpty={projects.length === 0}
+                    empty={emptyState}
+                    pagination={paginationProps}
+                    tableClassName="w-full text-left border-collapse"
+                    tbodyClassName="divide-y divide-surface-100 text-sm"
+                    tableHead={
+                        <tr className="bg-surface-50 border-b border-surface-200 text-surface-600 text-xs font-bold uppercase tracking-wider">
+                            <th className="py-3.5 px-4">Project & Client</th>
+                            <th className="py-3.5 px-4">Status</th>
+                            <th className="py-3.5 px-4">Timeline</th>
+                            <th className="py-3.5 px-4">Team</th>
+                            <th className="py-3.5 px-4 text-right">Actions</th>
+                        </tr>
+                    }
+                >
+                    {projects.map((project) => (
+                        <tr
+                            key={project.id}
+                            className="hover:bg-surface-50/80 transition-colors"
+                        >
+                            <td className="py-3.5 px-4">
+                                <p className="font-bold text-surface-900">{project.name}</p>
+                                <p className="text-xs text-surface-500">
+                                    Client: {project.clientName || 'Internal'}
+                                </p>
+                            </td>
+                            <td className="py-3.5 px-4">
+                                <StatusChip status={project.status} />
+                            </td>
+                            <td className="py-3.5 px-4 text-xs text-surface-600">
+                                {project.startDate
+                                    ? new Date(project.startDate).toLocaleDateString()
+                                    : '—'}{' '}
+                                –{' '}
+                                {project.endDate
+                                    ? new Date(project.endDate).toLocaleDateString()
+                                    : '—'}
+                            </td>
+                            <td className="py-3.5 px-4">
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-surface-700 bg-surface-100 px-2.5 py-1 rounded-full">
+                                    <Users className="w-3 h-3 text-orbit-500" />
+                                    {project.assignedUserCount}
+                                </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                                <div className="inline-flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/admin/projects/${project.id}/edit`)}
+                                        className="p-1.5 text-surface-500 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
+                                        title="Edit project"
                                     >
-                                        <td className="py-3.5 px-4">
-                                            <p className="font-bold text-surface-900">{project.name}</p>
-                                            <p className="text-xs text-surface-500">
-                                                Client: {project.clientName || 'Internal'}
-                                            </p>
-                                        </td>
-                                        <td className="py-3.5 px-4">
-                                            <StatusChip status={project.status} />
-                                        </td>
-                                        <td className="py-3.5 px-4 text-xs text-surface-600">
-                                            {project.startDate
-                                                ? new Date(project.startDate).toLocaleDateString()
-                                                : '—'}{' '}
-                                            –{' '}
-                                            {project.endDate
-                                                ? new Date(project.endDate).toLocaleDateString()
-                                                : '—'}
-                                        </td>
-                                        <td className="py-3.5 px-4">
-                                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-surface-700 bg-surface-100 px-2.5 py-1 rounded-full">
-                                                <Users className="w-3 h-3 text-orbit-500" />
-                                                {project.assignedUserCount}
-                                            </span>
-                                        </td>
-                                        <td className="py-3.5 px-4 text-right">
-                                            <div className="inline-flex items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => navigate(`/admin/projects/${project.id}/edit`)}
-                                                    className="p-1.5 text-surface-500 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
-                                                    title="Edit project"
-                                                >
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setDeleteTarget(project)}
-                                                    className="p-1.5 text-surface-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                                    title="Delete project"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                        <Edit2 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setDeleteTarget(project)}
+                                        className="p-1.5 text-surface-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                        title="Delete project"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </PaginatedPanel>
             )}
-
-            {/* Pagination */}
-            <Pagination
-                page={page}
-                limit={limit}
-                totalItems={meta.totalItems}
-                totalPages={meta.totalPages}
-                onPageChange={(p) => updateParams({ page: p })}
-                onLimitChange={(l) => updateParams({ limit: l, page: 1 })}
-            />
 
             {/* Confirm Soft-Delete Dialog */}
             <ConfirmDialog

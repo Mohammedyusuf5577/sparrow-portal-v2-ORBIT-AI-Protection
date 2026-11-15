@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPayroll, deletePayroll } from '../services/payrollService';
 import { EmployeePayroll } from '../types';
+import { usePagination } from '../../../hooks/usePagination';
+import { PaginatedPanel } from '../../../components/PaginatedPanel';
 import {
     DollarSign,
     Search,
@@ -52,6 +54,9 @@ const PayrollListPage: React.FC = () => {
         p.email.toLowerCase().includes(search.toLowerCase()) ||
         p.department.toLowerCase().includes(search.toLowerCase())
     );
+
+    // Client-side pagination (back to page 1 when the search changes)
+    const { pageItems, paginationProps } = usePagination(filtered, { resetKey: search });
 
     return (
         <div className="space-y-6">
@@ -134,102 +139,91 @@ const PayrollListPage: React.FC = () => {
             </div>
 
             {/* Table */}
-            {loading ? (
-                <div className="flex items-center justify-center h-64">
-                    <div className="w-10 h-10 border-4 border-orbit-200 border-t-orbit-600 rounded-full animate-spin" />
-                </div>
-            ) : (
-                <div className="bg-white rounded-2xl shadow-card overflow-hidden border border-surface-100">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-surface-50 border-b border-surface-100">
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Employee</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Department</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Position</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Type</th>
-                                    <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Net Salary</th>
-                                    <th className="text-right text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-surface-50">
-                                {filtered.map((item, i) => (
-                                    <tr
-                                        key={item.id}
-                                        className="hover:bg-orbit-50/20 transition-colors animate-slide-up"
-                                        style={{ animationDelay: `${i * 0.05}s` }}
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gradient-to-br from-orbit-500 to-orbit-700 rounded-xl flex items-center justify-center text-white font-bold shadow-sm">
-                                                    {item.name.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-surface-900">{item.name}</p>
-                                                    <p className="text-xs text-surface-500">{item.email}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm font-medium text-surface-700">{item.department}</span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-surface-600">
-                                            {item.designation}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${item.employmentType === 'FULL_TIME'
-                                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                                    : 'bg-amber-50 text-amber-600 border-amber-100'
-                                                }`}>
-                                                {item.employmentType}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm font-bold text-orbit-600">
-                                                ${item.netSalary?.toLocaleString() || '0'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/admin/payroll/details/${item.id}`)}
-                                                    className="p-2 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-xl transition-all"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="w-4.5 h-4.5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => navigate(`/admin/payroll/edit/${item.id}`)}
-                                                    className="p-2 text-surface-400 hover:text-accent-violet hover:bg-violet-50 rounded-xl transition-all"
-                                                    title="Edit"
-                                                >
-                                                    <Edit2 className="w-4.5 h-4.5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(item.id, item.name)}
-                                                    className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="w-4.5 h-4.5" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {filtered.length === 0 && (
-                        <div className="text-center py-16 bg-surface-50/30">
-                            <div className="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-surface-200">
-                                <Search className="w-8 h-8 text-surface-300" />
+            <PaginatedPanel
+                loading={loading}
+                isEmpty={filtered.length === 0}
+                empty={{
+                    icon: Search,
+                    title: 'No payroll records found',
+                    description: 'Try adjusting your search or add a new employee payroll record.',
+                }}
+                pagination={paginationProps}
+                tbodyClassName="divide-y divide-surface-50"
+                tableHead={
+                    <tr className="bg-surface-50 border-b border-surface-100">
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Employee</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Department</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Position</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Type</th>
+                        <th className="text-left text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Net Salary</th>
+                        <th className="text-right text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-4">Actions</th>
+                    </tr>
+                }
+            >
+                {pageItems.map((item, i) => (
+                    <tr
+                        key={item.id}
+                        className="hover:bg-orbit-50/20 transition-colors animate-slide-up"
+                        style={{ animationDelay: `${i * 0.05}s` }}
+                    >
+                        <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-orbit-500 to-orbit-700 rounded-xl flex items-center justify-center text-white font-bold shadow-sm">
+                                    {item.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-surface-900">{item.name}</p>
+                                    <p className="text-xs text-surface-500">{item.email}</p>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-bold text-surface-900">No payroll records found</h3>
-                            <p className="text-surface-500 max-w-xs mx-auto mt-1">Try adjusting your search or add a new employee payroll record.</p>
-                        </div>
-                    )}
-                </div>
-            )}
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className="text-sm font-medium text-surface-700">{item.department}</span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-surface-600">
+                            {item.designation}
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${item.employmentType === 'FULL_TIME'
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                    : 'bg-amber-50 text-amber-600 border-amber-100'
+                                }`}>
+                                {item.employmentType}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className="text-sm font-bold text-orbit-600">
+                                ${item.netSalary?.toLocaleString() || '0'}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                                <button
+                                    onClick={() => navigate(`/admin/payroll/details/${item.id}`)}
+                                    className="p-2 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-xl transition-all"
+                                    title="View Details"
+                                >
+                                    <Eye className="w-4.5 h-4.5" />
+                                </button>
+                                <button
+                                    onClick={() => navigate(`/admin/payroll/edit/${item.id}`)}
+                                    className="p-2 text-surface-400 hover:text-accent-violet hover:bg-violet-50 rounded-xl transition-all"
+                                    title="Edit"
+                                >
+                                    <Edit2 className="w-4.5 h-4.5" />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(item.id, item.name)}
+                                    className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                    title="Delete"
+                                >
+                                    <Trash2 className="w-4.5 h-4.5" />
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </PaginatedPanel>
         </div>
     );
 };

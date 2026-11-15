@@ -7,6 +7,9 @@ import {
     type PaymentOrderResponse,
     type PaymentResponse,
 } from '../api/services';
+import { CreditCard } from 'lucide-react';
+import { usePagination } from '../hooks/usePagination';
+import { PaginatedPanel } from '../components/PaginatedPanel';
 
 // ─── Razorpay window type ────────────────────────────────────────────────────
 declare global {
@@ -183,6 +186,9 @@ const PaymentsPage: React.FC = () => {
     const successCount = payments.filter(p => p.status === 'SUCCESS').length;
     const failedCount = payments.filter(p => p.status === 'FAILED').length;
 
+    // ── Client-side pagination ──
+    const { pageItems, paginationProps } = usePagination(payments);
+
     // ── Render ──
     return (
         <div className="min-h-screen bg-gray-950 text-white p-6 space-y-6">
@@ -234,77 +240,77 @@ const PaymentsPage: React.FC = () => {
             </div>
 
             {/* Payment History Table */}
-            <div className="bg-gray-900/60 border border-gray-800/60 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-800/60">
-                    <h2 className="text-lg font-semibold">Payment History</h2>
-                </div>
-
-                {loading ? (
+            <PaginatedPanel
+                variant="dark"
+                loading={loading}
+                isEmpty={payments.length === 0}
+                loadingFallback={
                     <div className="py-16 text-center text-gray-500">
                         <div className="inline-block w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3" />
                         <p>Loading payments...</p>
                     </div>
-                ) : payments.length === 0 ? (
-                    <div className="py-16 text-center text-gray-500">
-                        <div className="text-4xl mb-3">💳</div>
-                        <p>No payment records found.</p>
+                }
+                empty={{
+                    icon: CreditCard,
+                    title: 'No payment records found',
+                    description: 'Salary payments you disburse will appear here.',
+                }}
+                pagination={paginationProps}
+                tableClassName="w-full text-sm"
+                header={
+                    <div className="px-6 py-4 border-b border-gray-800/60">
+                        <h2 className="text-lg font-semibold">Payment History</h2>
                     </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-gray-800/60 text-gray-400 text-left">
-                                    <th className="px-6 py-3 font-medium">Employee</th>
-                                    <th className="px-6 py-3 font-medium">Order ID</th>
-                                    <th className="px-6 py-3 font-medium">Amount</th>
-                                    <th className="px-6 py-3 font-medium">Status</th>
-                                    <th className="px-6 py-3 font-medium">Date</th>
-                                    <th className="px-6 py-3 font-medium">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {payments.map((p, i) => (
-                                    <tr
-                                        key={p.id}
-                                        className={`border-b border-gray-800/40 hover:bg-gray-800/30 transition-colors ${i % 2 === 0 ? '' : 'bg-gray-800/10'}`}
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium">{p.employeeName}</div>
-                                            <div className="text-gray-500 text-xs">{p.employeeEmail}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="font-mono text-xs bg-gray-800 px-2 py-0.5 rounded">
-                                                {p.razorpayOrderId?.slice(0, 16)}…
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 font-semibold">
-                                            ₹{p.amountInr.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                                        </td>
-                                        <td className="px-6 py-4"><StatusBadge status={p.status} /></td>
-                                        <td className="px-6 py-4 text-gray-400">
-                                            {new Date(p.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {p.status === 'SUCCESS' && (
-                                                <button
-                                                    onClick={() => handleRefund(p.id, p.amountInr)}
-                                                    disabled={refundingId === p.id}
-                                                    className="text-xs px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg transition-colors disabled:opacity-50"
-                                                >
-                                                    {refundingId === p.id ? 'Refunding…' : 'Refund'}
-                                                </button>
-                                            )}
-                                            {p.status === 'FAILED' && p.failureReason && (
-                                                <span className="text-xs text-red-400">{p.failureReason}</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+                }
+                tableHead={
+                    <tr className="border-b border-gray-800/60 text-gray-400 text-left">
+                        <th className="px-6 py-3 font-medium">Employee</th>
+                        <th className="px-6 py-3 font-medium">Order ID</th>
+                        <th className="px-6 py-3 font-medium">Amount</th>
+                        <th className="px-6 py-3 font-medium">Status</th>
+                        <th className="px-6 py-3 font-medium">Date</th>
+                        <th className="px-6 py-3 font-medium">Actions</th>
+                    </tr>
+                }
+            >
+                {pageItems.map((p, i) => (
+                    <tr
+                        key={p.id}
+                        className={`border-b border-gray-800/40 hover:bg-gray-800/30 transition-colors ${i % 2 === 0 ? '' : 'bg-gray-800/10'}`}
+                    >
+                        <td className="px-6 py-4">
+                            <div className="font-medium">{p.employeeName}</div>
+                            <div className="text-gray-500 text-xs">{p.employeeEmail}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                            <span className="font-mono text-xs bg-gray-800 px-2 py-0.5 rounded">
+                                {p.razorpayOrderId?.slice(0, 16)}…
+                            </span>
+                        </td>
+                        <td className="px-6 py-4 font-semibold">
+                            ₹{p.amountInr.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-6 py-4"><StatusBadge status={p.status} /></td>
+                        <td className="px-6 py-4 text-gray-400">
+                            {new Date(p.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td className="px-6 py-4">
+                            {p.status === 'SUCCESS' && (
+                                <button
+                                    onClick={() => handleRefund(p.id, p.amountInr)}
+                                    disabled={refundingId === p.id}
+                                    className="text-xs px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    {refundingId === p.id ? 'Refunding…' : 'Refund'}
+                                </button>
+                            )}
+                            {p.status === 'FAILED' && p.failureReason && (
+                                <span className="text-xs text-red-400">{p.failureReason}</span>
+                            )}
+                        </td>
+                    </tr>
+                ))}
+            </PaginatedPanel>
 
             {/* ── Payment Modal ── */}
             {showModal && (

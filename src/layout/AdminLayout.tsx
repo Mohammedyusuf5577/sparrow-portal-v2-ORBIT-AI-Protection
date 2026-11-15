@@ -12,10 +12,10 @@ import {
     LogOut,
     Menu,
     X,
-    Shield,
     ChevronRight,
     DollarSign,
 } from 'lucide-react';
+import orbitMark from '../assets/images/orbit-mark.png';
 
 const navItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,8 +38,11 @@ const AdminLayout: React.FC = () => {
         navigate('/');
     };
 
+    // The shell never gets shorter than the sidebar's natural height (min-h-[35rem] = 560px). In a shorter window
+    // (e.g. DevTools docked and enlarged) the page is cropped / scrolls instead of squeezing the menu,
+    // so menu and content sizes stay constant.
     return (
-        <div className="flex h-screen bg-surface-50 overflow-hidden">
+        <div className="flex h-screen min-h-[35rem] bg-surface-50 overflow-hidden">
             {/* Sidebar */}
             <aside
                 className={`${sidebarOpen ? 'w-64' : 'w-20'
@@ -50,8 +53,8 @@ const AdminLayout: React.FC = () => {
                 {/* Logo */}
                 <div className="flex items-center justify-between px-5 py-6 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orbit-400 to-accent-violet flex items-center justify-center shadow-glow">
-                            <Shield className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-white flex items-center justify-center shadow-glow overflow-hidden">
+                            <img src={orbitMark} alt="ORBIT logo" className="w-full h-full object-contain" />
                         </div>
                         {sidebarOpen && (
                             <div className="animate-fade-in">
@@ -147,7 +150,7 @@ const AdminLayout: React.FC = () => {
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto p-6 animate-fade-in">
+                <main className="flex-1 overflow-y-auto overscroll-contain p-6 animate-fade-in">
                     <Outlet />
                 </main>
             </div>

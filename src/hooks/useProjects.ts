@@ -2,13 +2,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getProjects } from '../api/services';
 import type { Project, PageMeta, ProjectStatusType } from '../types';
+import { normalizePageSize, toPositiveInt } from '../utils/pagination';
 
 export const useProjects = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Read state strictly from URL query parameters (single source of truth)
-    const page = Number(searchParams.get('page')) || 1;
-    const limit = Number(searchParams.get('limit')) || 10;
+    // Sanitised so a hand-edited URL (?page=-1, ?limit=7) can never produce a backend validation error
+    const page = toPositiveInt(searchParams.get('page'), 1);
+    const limit = normalizePageSize(searchParams.get('limit'));
     const search = searchParams.get('search') || '';
     const status = (searchParams.get('status') || '') as ProjectStatusType | '';
     const month = searchParams.get('month') ? Number(searchParams.get('month')) : '';

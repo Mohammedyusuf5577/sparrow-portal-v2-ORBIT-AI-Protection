@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/AuthContext';
 import { login as loginApi } from '../api/services';
-import { Shield, ArrowRight, Zap, Eye, Activity } from 'lucide-react';
+import { ArrowRight, Zap, Eye, Activity } from 'lucide-react';
+import orbitMark from '../assets/images/orbit-mark.png';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -42,8 +43,8 @@ const LoginPage: React.FC = () => {
 
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
                     <div className="flex items-center gap-4 mb-10">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orbit-400 to-accent-violet flex items-center justify-center shadow-glow">
-                            <Shield className="w-7 h-7" />
+                        <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-glow overflow-hidden">
+                            <img src={orbitMark} alt="ORBIT logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">ORBIT</h1>
@@ -93,8 +94,8 @@ const LoginPage: React.FC = () => {
                 <div className="w-full max-w-md animate-bounce-in">
                     {/* Mobile logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-10">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-orbit flex items-center justify-center shadow-glow">
-                            <Shield className="w-6 h-6 text-white" />
+                        <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-glow overflow-hidden">
+                            <img src={orbitMark} alt="ORBIT logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-surface-900">ORBIT</h1>
