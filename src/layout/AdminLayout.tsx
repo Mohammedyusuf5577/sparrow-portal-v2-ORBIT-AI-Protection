@@ -7,13 +7,13 @@ import {
     Users,
     CalendarCheck,
     CalendarOff,
-    Brain,
+    Activity,
     Bell,
     LogOut,
     Menu,
-    X,
-    ChevronRight,
-    DollarSign,
+    PanelLeftClose,
+    PanelLeftOpen,
+    IndianRupee,
 } from 'lucide-react';
 import orbitMark from '../assets/images/orbit-mark.png';
 
@@ -23,8 +23,8 @@ const navItems = [
     { path: '/admin/employees', label: 'Employees', icon: Users },
     { path: '/admin/attendance', label: 'Attendance', icon: CalendarCheck },
     { path: '/admin/leaves', label: 'Leaves', icon: CalendarOff },
-    { path: '/admin/ai-monitor', label: 'AI Monitor', icon: Brain },
-    { path: '/admin/payroll', label: 'Payroll', icon: DollarSign },
+    { path: '/admin/ai-monitor', label: 'AI Monitor', icon: Activity },
+    { path: '/admin/payroll', label: 'Payroll', icon: IndianRupee },
 ];
 
 const AdminLayout: React.FC = () => {
@@ -43,69 +43,72 @@ const AdminLayout: React.FC = () => {
     // so menu and content sizes stay constant.
     return (
         <div className="flex h-screen min-h-[35rem] bg-surface-50 overflow-hidden">
-            {/* Sidebar */}
+            {/* Sidebar: one quiet surface, the page is where the colour lives. */}
             <aside
-                className={`${sidebarOpen ? 'w-64' : 'w-20'
-                    } fixed lg:relative z-30 h-full transition-all duration-300 ease-in-out
-        ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        bg-gradient-dark text-white flex flex-col shadow-elevated`}
+                className={`${sidebarOpen ? 'w-60' : 'w-[72px]'}
+        fixed lg:relative z-30 h-full flex flex-col bg-white border-r border-surface-200
+        transition-transform duration-200 ease-orbit
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
             >
-                {/* Logo */}
-                <div className="flex items-center justify-between px-5 py-6 border-b border-white/10">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-white flex items-center justify-center shadow-glow overflow-hidden">
-                            <img src={orbitMark} alt="ORBIT logo" className="w-full h-full object-contain" />
-                        </div>
-                        {sidebarOpen && (
-                            <div className="animate-fade-in">
-                                <h1 className="text-lg font-bold tracking-tight">ORBIT</h1>
-                                <p className="text-[10px] text-orbit-200 font-medium tracking-wider uppercase">AI Intelligence</p>
-                            </div>
-                        )}
-                    </div>
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="hidden lg:flex p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-                    >
-                        <ChevronRight className={`w-4 h-4 transition-transform ${sidebarOpen ? 'rotate-180' : ''}`} />
-                    </button>
+                {/* Brand */}
+                <div className={`h-16 flex items-center gap-2.5 border-b border-surface-200 flex-shrink-0 ${sidebarOpen ? 'px-5' : 'justify-center'}`}>
+                    <img src={orbitMark} alt="" className="w-8 h-8 flex-shrink-0 object-contain" />
+                    {sidebarOpen && <span className="text-base font-medium text-surface-900">ORBIT</span>}
                 </div>
 
-                {/* Nav */}
-                <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+                {/* Navigation */}
+                <nav aria-label="Primary" className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
+                            title={sidebarOpen ? undefined : item.label}
                             onClick={() => setMobileOpen(false)}
                             className={({ isActive }) =>
-                                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group
+                                `flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm transition-colors duration-150
+                ${sidebarOpen ? '' : 'justify-center'}
                 ${isActive
-                                    ? 'bg-white/15 text-white shadow-lg shadow-white/5'
-                                    : 'text-white/60 hover:text-white hover:bg-white/8'
+                                    ? 'bg-surface-100 text-surface-900 font-medium ring-1 ring-inset ring-surface-200'
+                                    : 'text-surface-600 hover:bg-surface-100 hover:text-surface-900'
                                 }`
                             }
                         >
-                            <item.icon className="w-5 h-5 flex-shrink-0" />
-                            {sidebarOpen && <span className="animate-fade-in">{item.label}</span>}
+                            {({ isActive }) => (
+                                <>
+                                    <item.icon
+                                        className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-orbit-600' : 'text-surface-500'}`}
+                                        strokeWidth={1.5}
+                                    />
+                                    <span className={sidebarOpen ? '' : 'sr-only'}>{item.label}</span>
+                                </>
+                            )}
                         </NavLink>
                     ))}
                 </nav>
 
-                {/* User */}
-                <div className="p-4 border-t border-white/10">
-                    {sidebarOpen && (
-                        <div className="mb-3 animate-fade-in">
-                            <p className="text-sm font-semibold truncate">{user?.fullName}</p>
-                            <p className="text-xs text-orbit-200 truncate">{user?.email}</p>
+                {/* Signed-in user */}
+                <div className="p-3 border-t border-surface-200 flex-shrink-0">
+                    <div className={`flex items-center gap-2.5 px-2.5 py-2 ${sidebarOpen ? '' : 'justify-center'}`}>
+                        <div
+                            className="w-8 h-8 flex-shrink-0 rounded-full bg-surface-100 text-surface-700 text-sm font-medium flex items-center justify-center"
+                            aria-hidden="true"
+                        >
+                            {user?.fullName?.charAt(0) || 'A'}
                         </div>
-                    )}
+                        {sidebarOpen && (
+                            <div className="min-w-0">
+                                <p className="text-sm font-medium text-surface-900 truncate">{user?.fullName}</p>
+                                <p className="text-xs text-surface-500 truncate">{user?.email}</p>
+                            </div>
+                        )}
+                    </div>
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-white/60 hover:text-white hover:bg-rose-500/20 transition-all"
+                        title={sidebarOpen ? undefined : 'Log out'}
+                        className={`flex items-center gap-2.5 h-9 w-full px-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition-colors duration-150 ${sidebarOpen ? '' : 'justify-center'}`}
                     >
-                        <LogOut className="w-5 h-5 flex-shrink-0" />
-                        {sidebarOpen && <span>Logout</span>}
+                        <LogOut className="w-4 h-4 flex-shrink-0 text-surface-500" strokeWidth={1.5} />
+                        <span className={sidebarOpen ? '' : 'sr-only'}>Log out</span>
                     </button>
                 </div>
             </aside>
@@ -113,45 +116,53 @@ const AdminLayout: React.FC = () => {
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+                    className="fixed inset-0 bg-black/40 z-20 lg:hidden"
                     onClick={() => setMobileOpen(false)}
                 />
             )}
 
             {/* Main */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Navbar */}
-                <header className="h-16 bg-white border-b border-surface-200 flex items-center justify-between px-6 flex-shrink-0 shadow-card">
-                    <div className="flex items-center gap-4">
+                {/* Top bar */}
+                <header className="h-16 bg-white border-b border-surface-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
+                    <div className="flex items-center gap-2">
                         <button
                             onClick={() => setMobileOpen(true)}
-                            className="lg:hidden p-2 rounded-lg hover:bg-surface-100 transition-colors"
+                            className="lg:hidden h-9 w-9 flex items-center justify-center rounded-lg text-surface-600 hover:bg-surface-100 transition-colors"
+                            aria-label="Open menu"
                         >
-                            <Menu className="w-5 h-5 text-surface-600" />
+                            <Menu className="w-4 h-4" strokeWidth={1.5} />
                         </button>
-                        <div>
-                            <h2 className="text-sm font-semibold text-surface-800">Admin Console</h2>
-                            <p className="text-xs text-surface-400">ORBIT Intelligence Platform</p>
-                        </div>
+                        <button
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            className="hidden lg:flex h-9 w-9 items-center justify-center rounded-lg text-surface-600 hover:bg-surface-100 transition-colors"
+                            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+                            aria-expanded={sidebarOpen}
+                        >
+                            {sidebarOpen ? (
+                                <PanelLeftClose className="w-4 h-4" strokeWidth={1.5} />
+                            ) : (
+                                <PanelLeftOpen className="w-4 h-4" strokeWidth={1.5} />
+                            )}
+                        </button>
+                        <h2 className="text-sm font-medium text-surface-900">Admin console</h2>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => navigate('/admin/ai-monitor')}
-                            className="relative p-2.5 rounded-xl hover:bg-orbit-50 transition-colors group"
-                        >
-                            <Bell className="w-5 h-5 text-surface-500 group-hover:text-orbit-600 transition-colors" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent-rose rounded-full animate-pulse" />
-                        </button>
-                        <div className="w-9 h-9 rounded-xl bg-gradient-orbit flex items-center justify-center text-white text-sm font-bold shadow-glow">
-                            {user?.fullName?.charAt(0) || 'A'}
-                        </div>
-                    </div>
+                    <button
+                        onClick={() => navigate('/admin/ai-monitor')}
+                        className="relative h-9 w-9 flex items-center justify-center rounded-lg text-surface-600 hover:bg-surface-100 transition-colors"
+                        aria-label="Open notifications"
+                    >
+                        <Bell className="w-4 h-4" strokeWidth={1.5} />
+                        <span className="absolute top-2 right-2.5 w-1.5 h-1.5 bg-accent-rose rounded-full" />
+                    </button>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 overflow-y-auto overscroll-contain p-6 animate-fade-in">
-                    <Outlet />
+                {/* Page content */}
+                <main className="flex-1 overflow-y-auto overscroll-contain">
+                    <div className="mx-auto w-full max-w-[1440px] px-6 py-6 lg:px-8 lg:py-8 animate-fade-in">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>

@@ -7,59 +7,61 @@ export default {
     theme: {
         extend: {
             colors: {
+                // Brand accent: the cobalt of the ORBIT mark. It marks the primary action, the selection
+                // and the one figure that matters on a screen. Never a surface colour.
                 orbit: {
-                    50: '#f0f4ff',
-                    100: '#dbe4ff',
-                    200: '#bac8ff',
-                    300: '#91a7ff',
-                    400: '#748ffc',
-                    500: '#5c7cfa',
-                    600: '#4c6ef5',
-                    700: '#4263eb',
-                    800: '#3b5bdb',
-                    900: '#364fc7',
-                    950: '#1e3a8a',
+                    50: '#eff6ff',
+                    100: '#dbeafe',
+                    200: '#bfdbfe',
+                    300: '#93c5fd',
+                    400: '#60a5fa',
+                    500: '#3b82f6',
+                    600: '#2563eb', // 5.2:1 on white, safe for text and for white-on-fill
+                    700: '#1d4ed8',
+                    800: '#1e40af',
+                    900: '#1e3a8a',
+                    950: '#172554',
                 },
+                // Semantic colours only. Each one is dark enough to carry text on white (4.5:1).
                 accent: {
-                    teal: '#0d9488',
-                    amber: '#f59e0b',
-                    rose: '#f43f5e',
-                    emerald: '#10b981',
-                    violet: '#8b5cf6',
+                    teal: '#0f766e',
+                    amber: '#b45309',
+                    rose: '#dc2626',
+                    emerald: '#15803d',
                 },
+                // One neutral ramp (graphite) for every surface, border and text role.
+                //   text roles: primary 900, secondary 600, muted 400/500
+                //   hairline:   200
                 surface: {
                     50: '#fafafa',
                     100: '#f4f4f5',
-                    200: '#e4e4e7',
+                    200: '#e8e8ea',
                     300: '#d4d4d8',
-                    400: '#a1a1aa',
-                    500: '#71717a',
-                    600: '#52525b',
-                    700: '#3f3f46',
-                    800: '#27272a',
-                    900: '#18181b',
-                }
+                    400: '#737373',
+                    500: '#737373',
+                    600: '#525252',
+                    700: '#404040',
+                    800: '#262626',
+                    900: '#171717',
+                },
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+                mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
             },
+            // Depth is neutral, soft and small. Nothing glows.
             boxShadow: {
-                'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.08)',
-                'card': '0 2px 12px 0 rgba(0, 0, 0, 0.05)',
-                'elevated': '0 10px 40px -10px rgba(0, 0, 0, 0.12)',
-                'glow': '0 0 20px rgba(92, 124, 250, 0.3)',
+                card: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                elevated: '0 8px 24px rgba(0, 0, 0, 0.06)',
             },
-            backgroundImage: {
-                'gradient-orbit': 'linear-gradient(135deg, #4263eb 0%, #5c7cfa 50%, #748ffc 100%)',
-                'gradient-dark': 'linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #4c1d95 100%)',
-                'gradient-surface': 'linear-gradient(180deg, #fafafa 0%, #f4f4f5 100%)',
+            transitionTimingFunction: {
+                orbit: 'cubic-bezier(0.22, 1, 0.36, 1)',
             },
+            // One easing curve. Entrances are a short fade and a small rise.
             animation: {
-                'fade-in': 'fadeIn 0.5s ease-out',
-                'slide-up': 'slideUp 0.5s ease-out',
-                'slide-in-right': 'slideInRight 0.3s ease-out',
-                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'bounce-in': 'bounceIn 0.6s ease-out',
+                'fade-in': 'fadeIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                'slide-up': 'slideUp 360ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                'scale-up': 'scaleUp 200ms cubic-bezier(0.22, 1, 0.36, 1) both',
             },
             keyframes: {
                 fadeIn: {
@@ -67,17 +69,12 @@ export default {
                     '100%': { opacity: '1' },
                 },
                 slideUp: {
-                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                    '0%': { opacity: '0', transform: 'translateY(8px)' },
                     '100%': { opacity: '1', transform: 'translateY(0)' },
                 },
-                slideInRight: {
-                    '0%': { opacity: '0', transform: 'translateX(20px)' },
-                    '100%': { opacity: '1', transform: 'translateX(0)' },
-                },
-                bounceIn: {
-                    '0%': { opacity: '0', transform: 'scale(0.9)' },
-                    '60%': { opacity: '1', transform: 'scale(1.02)' },
-                    '100%': { transform: 'scale(1)' },
+                scaleUp: {
+                    '0%': { opacity: '0', transform: 'scale(0.98)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' },
                 },
             },
         },
