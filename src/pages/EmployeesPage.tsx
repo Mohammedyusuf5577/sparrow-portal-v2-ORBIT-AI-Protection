@@ -294,7 +294,7 @@ const EmployeesPage: React.FC = () => {
                         <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
                                 <Avatar name={user.fullName} />
-                                <span className="text-sm font-medium text-surface-900">{user.fullName}</span>
+                                <span className="text-sm font-medium text-surface-900 whitespace-nowrap">{user.fullName}</span>
                             </div>
                         </td>
                         <td className="px-5 py-3 text-sm text-surface-600">{user.email}</td>

@@ -141,7 +141,7 @@ const AttendancePage: React.FC = () => {
                         <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
                                 <Avatar name={record.employeeName} />
-                                <span className="text-sm font-medium text-surface-900">{record.employeeName}</span>
+                                <span className="text-sm font-medium text-surface-900 whitespace-nowrap">{record.employeeName}</span>
                             </div>
                         </td>
                         <td className="px-5 py-3 text-sm text-surface-600 tabular-nums">{formatDate(record.date)}</td>

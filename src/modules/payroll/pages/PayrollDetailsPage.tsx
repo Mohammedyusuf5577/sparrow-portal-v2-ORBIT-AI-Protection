@@ -8,28 +8,54 @@ import {
     saveAttendance
 } from '../services/payrollService';
 import { EmployeePayroll } from '../types';
-import {
-    ArrowLeft,
-    User,
-    CreditCard,
-    FileText,
-    DollarSign,
-    CalendarCheck,
-    Save,
-    CheckCircle2,
-    Briefcase,
-    Building2,
-    Calendar,
-    Phone,
-    Mail
-} from 'lucide-react';
+import { Avatar } from '../../../components/Avatar';
+import { FormField } from '../../../components/FormField';
+import { Status, formatEnum } from '../../../components/StatusDot';
+import { btn, inputCls, formatDate, formatINR } from '../../../components/ui';
+import { ArrowLeft } from 'lucide-react';
+
+type TabKey = 'info' | 'bank' | 'tax' | 'salary' | 'attendance';
+
+const TABS: { id: TabKey; name: string }[] = [
+    { id: 'info', name: 'Basic info' },
+    { id: 'bank', name: 'Bank details' },
+    { id: 'tax', name: 'Tax and compliance' },
+    { id: 'salary', name: 'Salary structure' },
+    { id: 'attendance', name: 'Attendance' },
+];
+
+/** Number input with a rupee sign inside the field. */
+const MoneyInput: React.FC<{ id: string; value: number; onChange: (value: number) => void }> = ({ id, value, onChange }) => (
+    <div className="relative">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-surface-500" aria-hidden="true">
+            ₹
+        </span>
+        <input
+            id={id}
+            type="number"
+            required
+            className={`${inputCls} pl-7 tabular-nums`}
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value))}
+        />
+    </div>
+);
+
+const SaveButton: React.FC<{ saving: boolean; children: React.ReactNode }> = ({ saving, children }) => (
+    <div className="pt-5 border-t border-surface-200 flex justify-end">
+        <button type="submit" disabled={saving} className={btn.primary}>
+            {saving && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            {children}
+        </button>
+    </div>
+);
 
 const PayrollDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [payroll, setPayroll] = useState<EmployeePayroll | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'info' | 'bank' | 'tax' | 'salary' | 'attendance'>('info');
+    const [activeTab, setActiveTab] = useState<TabKey>('info');
     const [saving, setSaving] = useState(false);
 
     // Form states for sections
@@ -109,355 +135,273 @@ const PayrollDetailsPage: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="flex items-center justify-center h-screen">
-            <div className="w-12 h-12 border-4 border-orbit-200 border-t-orbit-600 rounded-full animate-spin" />
+        <div className="flex items-center justify-center h-64">
+            <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-surface-200 border-t-orbit-600 rounded-full animate-spin" />
         </div>
     );
 
-    if (!payroll) return <div>Record not found</div>;
+    if (!payroll) return <p className="text-sm text-surface-600">Record not found</p>;
 
-    const tabs = [
-        { id: 'info', name: 'Basic Info', icon: User },
-        { id: 'bank', name: 'Bank Details', icon: CreditCard },
-        { id: 'tax', name: 'Tax / Compliance', icon: FileText },
-        { id: 'salary', name: 'Salary Structure', icon: DollarSign },
-        { id: 'attendance', name: 'Attendance', icon: CalendarCheck },
-    ];
+    const estimatedNet = salaryForm.basicSalary + salaryForm.allowance - salaryForm.pf - salaryForm.tax - salaryForm.otherDeduction;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-12">
             <div className="flex items-center justify-between">
                 <button
                     onClick={() => navigate('/admin/payroll')}
-                    className="flex items-center gap-2 text-surface-500 hover:text-orbit-600 font-medium transition-colors group"
+                    className="inline-flex items-center gap-2 text-sm text-surface-600 hover:text-surface-900 transition-colors"
                 >
-                    <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                    Back to Payroll List
+                    <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+                    Back to payroll
                 </button>
-                <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-surface-400">ID: {payroll.id.slice(0, 8)}...</span>
-                </div>
+                <span className="font-mono text-xs text-surface-500">ID {payroll.id.slice(0, 8)}</span>
             </div>
 
-            {/* Profile Header */}
-            <div className="bg-white rounded-2xl p-8 shadow-card border border-surface-100 flex flex-col md:flex-row gap-8 items-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-orbit-500 to-orbit-700 rounded-2xl flex items-center justify-center text-white text-4xl font-medium">
-                    {payroll.name.charAt(0)}
-                </div>
-                <div className="flex-1 text-center md:text-left">
-                    <h1 className="text-3xl font-medium text-surface-900">{payroll.name}</h1>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-2 text-surface-500">
-                        <span className="flex items-center gap-1.5 text-sm">
-                            <Building2 className="w-4 h-4" /> {payroll.department}
-                        </span>
-                        <span className="flex items-center gap-1.5 text-sm">
-                            <Briefcase className="w-4 h-4" /> {payroll.designation}
-                        </span>
-                        <span className="flex items-center gap-1.5 text-sm">
-                            <span className="w-2 h-2 rounded-full bg-green-500" /> {payroll.employmentType}
-                        </span>
+            {/* Profile header */}
+            <div className="panel p-6 flex flex-col md:flex-row md:items-center gap-6">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <Avatar name={payroll.name} size="lg" />
+                    <div className="min-w-0">
+                        <h1 className="text-2xl font-medium text-surface-900 truncate">{payroll.name}</h1>
+                        <p className="mt-1 text-sm text-surface-600">
+                            {payroll.department}
+                            <span className="mx-2 text-surface-300" aria-hidden="true">·</span>
+                            {payroll.designation}
+                            <span className="mx-2 text-surface-300" aria-hidden="true">·</span>
+                            {formatEnum(payroll.employmentType)}
+                        </p>
                     </div>
                 </div>
-                <div className="bg-orbit-50 p-4 rounded-xl border border-orbit-100 text-center px-8">
-                    <p className="text-xs font-medium text-orbit-600">Calculated Net Salary</p>
-                    <p className="text-3xl font-medium text-orbit-700 mt-1">${payroll.netSalary?.toLocaleString()}</p>
+                <div className="md:pl-8 md:border-l md:border-surface-200">
+                    <p className="text-sm text-surface-600">Calculated net salary</p>
+                    <p className="mt-1 text-3xl font-medium leading-none text-surface-900 tabular-nums">{formatINR(payroll.netSalary)}</p>
                 </div>
             </div>
 
-            {/* Tabs Navigation */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                {tabs.map(tab => (
+            {/* Tabs */}
+            <div role="tablist" className="flex items-center gap-6 border-b border-surface-200 overflow-x-auto">
+                {TABS.map((tab) => (
                     <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
-                                ? 'bg-orbit-600 text-white shadow-glow'
-                                : 'bg-white text-surface-600 border border-surface-200 hover:border-orbit-300'
-                            }`}
+                        role="tab"
+                        aria-selected={activeTab === tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`-mb-px h-10 text-sm whitespace-nowrap border-b-2 transition-colors duration-150 ${
+                            activeTab === tab.id
+                                ? 'border-orbit-600 text-surface-900 font-medium'
+                                : 'border-transparent text-surface-600 hover:text-surface-900'
+                        }`}
                     >
-                        <tab.icon className="w-4 h-4" />
                         {tab.name}
                     </button>
                 ))}
             </div>
 
-            {/* Tab Content */}
-            <div className="bg-white rounded-2xl p-8 shadow-card border border-surface-100 min-h-[400px]">
+            {/* Tab content */}
+            <div className="panel p-6 min-h-[360px]">
                 {activeTab === 'info' && (
-                    <div className="space-y-8 animate-fade-in">
+                    <div className="space-y-6 animate-fade-in">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-medium text-surface-900">Employment Summary</h3>
-                            <button
-                                onClick={() => navigate(`/admin/payroll/edit/${payroll.id}`)}
-                                className="px-4 py-2 border border-orbit-200 text-orbit-600 rounded-lg text-sm font-medium hover:bg-orbit-50 transition-colors"
-                            >
-                                Edit Profile
+                            <h3 className="text-base font-medium text-surface-900">Employment summary</h3>
+                            <button onClick={() => navigate(`/admin/payroll/edit/${payroll.id}`)} className={btn.secondary}>
+                                Edit profile
                             </button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            <div className="space-y-1">
-                                <p className="text-xs font-medium text-surface-400">Email Address</p>
-                                <div className="flex items-center gap-2 text-surface-900 font-medium">
-                                    <Mail className="w-4 h-4 text-orbit-500" /> {payroll.email}
-                                </div>
+                        <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+                            <div>
+                                <dt className="text-sm text-surface-500">Email address</dt>
+                                <dd className="mt-1 text-sm text-surface-900">{payroll.email}</dd>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-xs font-medium text-surface-400">Mobile Number</p>
-                                <div className="flex items-center gap-2 text-surface-900 font-medium">
-                                    <Phone className="w-4 h-4 text-orbit-500" /> {payroll.mobile}
-                                </div>
+                            <div>
+                                <dt className="text-sm text-surface-500">Mobile number</dt>
+                                <dd className="mt-1 text-sm text-surface-900 tabular-nums">{payroll.mobile}</dd>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-xs font-medium text-surface-400">Joined On</p>
-                                <div className="flex items-center gap-2 text-surface-900 font-medium">
-                                    <Calendar className="w-4 h-4 text-orbit-500" /> {new Date(payroll.joinDate).toLocaleDateString()}
-                                </div>
+                            <div>
+                                <dt className="text-sm text-surface-500">Joined on</dt>
+                                <dd className="mt-1 text-sm text-surface-900 tabular-nums">{formatDate(payroll.joinDate)}</dd>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-xs font-medium text-surface-400">Status</p>
-                                <div className="flex items-center gap-2">
-                                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
-                                </div>
+                            <div>
+                                <dt className="text-sm text-surface-500">Status</dt>
+                                <dd className="mt-1">
+                                    <Status tone="positive">Active</Status>
+                                </dd>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-xs font-medium text-surface-400">Payroll ID</p>
-                                <p className="text-surface-900 font-mono text-sm">{payroll.id}</p>
+                            <div>
+                                <dt className="text-sm text-surface-500">Payroll ID</dt>
+                                <dd className="mt-1 font-mono text-sm text-surface-900 break-all">{payroll.id}</dd>
                             </div>
-                        </div>
+                        </dl>
                     </div>
                 )}
 
                 {activeTab === 'bank' && (
                     <form onSubmit={handleSaveBank} className="space-y-6 animate-fade-in">
-                        <h3 className="text-xl font-medium text-surface-900">Banking Information</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Account Holder Name</label>
+                        <h3 className="text-base font-medium text-surface-900">Banking information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <FormField label="Account holder name" htmlFor="bank-holder" required>
                                 <input
+                                    id="bank-holder"
                                     type="text" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={inputCls}
                                     value={bankForm.accountName}
                                     onChange={e => setBankForm({ ...bankForm, accountName: e.target.value })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Bank Name</label>
+                            </FormField>
+                            <FormField label="Bank name" htmlFor="bank-name" required>
                                 <input
+                                    id="bank-name"
                                     type="text" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={inputCls}
                                     value={bankForm.bankName}
                                     onChange={e => setBankForm({ ...bankForm, bankName: e.target.value })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Account Number</label>
+                            </FormField>
+                            <FormField label="Account number" htmlFor="bank-number" required>
                                 <input
+                                    id="bank-number"
                                     type="text" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={`${inputCls} tabular-nums`}
                                     value={bankForm.accountNumber}
                                     onChange={e => setBankForm({ ...bankForm, accountNumber: e.target.value })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">IFSC / Swift Code</label>
+                            </FormField>
+                            <FormField label="IFSC or SWIFT code" htmlFor="bank-ifsc" required>
                                 <input
+                                    id="bank-ifsc"
                                     type="text" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={inputCls}
                                     value={bankForm.ifsc}
                                     onChange={e => setBankForm({ ...bankForm, ifsc: e.target.value })}
                                 />
-                            </div>
+                            </FormField>
                         </div>
-                        <div className="pt-4 flex justify-end">
-                            <button type="submit" disabled={saving} className="flex items-center gap-2 px-8 py-3 bg-orbit-600 text-white rounded-xl font-medium hover:bg-orbit-700 transition-colors disabled:opacity-50">
-                                {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
-                                Save Bank Details
-                            </button>
-                        </div>
+                        <SaveButton saving={saving}>Save bank details</SaveButton>
                     </form>
                 )}
 
                 {activeTab === 'tax' && (
                     <form onSubmit={handleSaveTax} className="space-y-6 animate-fade-in">
-                        <h3 className="text-xl font-medium text-surface-900">Tax & Compliance</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">PAN Card Number</label>
+                        <h3 className="text-base font-medium text-surface-900">Tax and compliance</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <FormField label="PAN card number" htmlFor="tax-pan" required>
                                 <input
+                                    id="tax-pan"
                                     type="text" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={inputCls}
                                     value={taxForm.pan}
                                     onChange={e => setTaxForm({ ...taxForm, pan: e.target.value })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Aadhaar Number</label>
+                            </FormField>
+                            <FormField label="Aadhaar number" htmlFor="tax-aadhaar" required>
                                 <input
+                                    id="tax-aadhaar"
                                     type="text" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={inputCls}
                                     value={taxForm.aadhaar}
                                     onChange={e => setTaxForm({ ...taxForm, aadhaar: e.target.value })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">UAN Number (Optional)</label>
+                            </FormField>
+                            <FormField label="UAN number" htmlFor="tax-uan" hint="Optional">
                                 <input
+                                    id="tax-uan"
                                     type="text"
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={inputCls}
                                     value={taxForm.uan}
                                     onChange={e => setTaxForm({ ...taxForm, uan: e.target.value })}
                                 />
-                            </div>
+                            </FormField>
                         </div>
-                        <div className="pt-4 flex justify-end">
-                            <button type="submit" disabled={saving} className="flex items-center gap-2 px-8 py-3 bg-orbit-600 text-white rounded-xl font-medium hover:bg-orbit-700 transition-colors disabled:opacity-50">
-                                {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
-                                Save Tax Info
-                            </button>
-                        </div>
+                        <SaveButton saving={saving}>Save tax info</SaveButton>
                     </form>
                 )}
 
                 {activeTab === 'salary' && (
                     <form onSubmit={handleSaveSalary} className="space-y-6 animate-fade-in">
-                        <h3 className="text-xl font-medium text-surface-900">Salary Structure</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div className="p-4 bg-green-50 rounded-xl border border-green-100 space-y-4">
-                                <h4 className="text-xs font-medium text-green-700">Earnings</h4>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-medium text-green-600 mb-1">Basic Salary</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-600 font-medium">$</span>
-                                            <input
-                                                type="number" required
-                                                className="w-full pl-8 pr-4 py-2 border border-green-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20"
-                                                value={salaryForm.basicSalary}
-                                                onChange={e => setSalaryForm({ ...salaryForm, basicSalary: Number(e.target.value) })}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-green-600 mb-1">Allowance</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-600 font-medium">$</span>
-                                            <input
-                                                type="number" required
-                                                className="w-full pl-8 pr-4 py-2 border border-green-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20"
-                                                value={salaryForm.allowance}
-                                                onChange={e => setSalaryForm({ ...salaryForm, allowance: Number(e.target.value) })}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <h3 className="text-base font-medium text-surface-900">Salary structure</h3>
 
-                            <div className="p-4 bg-red-50 rounded-xl border border-red-100 space-y-4">
-                                <h4 className="text-xs font-medium text-red-700">Deductions</h4>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-medium text-red-600 mb-1">Provident Fund (PF)</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-red-600 font-medium">$</span>
-                                            <input
-                                                type="number" required
-                                                className="w-full pl-8 pr-4 py-2 border border-red-200 rounded-lg outline-none focus:ring-2 focus:ring-red-500/20"
-                                                value={salaryForm.pf}
-                                                onChange={e => setSalaryForm({ ...salaryForm, pf: Number(e.target.value) })}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-red-600 mb-1">Tax</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-red-600 font-medium">$</span>
-                                            <input
-                                                type="number" required
-                                                className="w-full pl-8 pr-4 py-2 border border-red-200 rounded-lg outline-none focus:ring-2 focus:ring-red-500/20"
-                                                value={salaryForm.tax}
-                                                onChange={e => setSalaryForm({ ...salaryForm, tax: Number(e.target.value) })}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-red-600 mb-1">Other Deductions</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-red-600 font-medium">$</span>
-                                            <input
-                                                type="number" required
-                                                className="w-full pl-8 pr-4 py-2 border border-red-200 rounded-lg outline-none focus:ring-2 focus:ring-red-500/20"
-                                                value={salaryForm.otherDeduction}
-                                                onChange={e => setSalaryForm({ ...salaryForm, otherDeduction: Number(e.target.value) })}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <fieldset className="space-y-4">
+                                <legend className="mb-4 flex items-center gap-2 text-sm font-medium text-surface-900">
+                                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-emerald" aria-hidden="true" />
+                                    Earnings
+                                </legend>
+                                <FormField label="Basic salary" htmlFor="salary-basic" required>
+                                    <MoneyInput id="salary-basic" value={salaryForm.basicSalary} onChange={(v) => setSalaryForm({ ...salaryForm, basicSalary: v })} />
+                                </FormField>
+                                <FormField label="Allowance" htmlFor="salary-allowance" required>
+                                    <MoneyInput id="salary-allowance" value={salaryForm.allowance} onChange={(v) => setSalaryForm({ ...salaryForm, allowance: v })} />
+                                </FormField>
+                            </fieldset>
 
-                            <div className="p-4 bg-orbit-50 rounded-xl border border-orbit-100 flex flex-col justify-center text-center">
-                                <p className="text-xs font-medium text-orbit-600">Estimated Net Pay</p>
-                                <p className="text-4xl font-medium text-orbit-700 mt-2">
-                                    ${(salaryForm.basicSalary + salaryForm.allowance - salaryForm.pf - salaryForm.tax - salaryForm.otherDeduction).toLocaleString()}
-                                </p>
-                                <p className="text-xs text-orbit-400 mt-2 font-medium">Final amount may vary based on attendance</p>
+                            <fieldset className="space-y-4">
+                                <legend className="mb-4 flex items-center gap-2 text-sm font-medium text-surface-900">
+                                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-rose" aria-hidden="true" />
+                                    Deductions
+                                </legend>
+                                <FormField label="Provident fund (PF)" htmlFor="salary-pf" required>
+                                    <MoneyInput id="salary-pf" value={salaryForm.pf} onChange={(v) => setSalaryForm({ ...salaryForm, pf: v })} />
+                                </FormField>
+                                <FormField label="Tax" htmlFor="salary-tax" required>
+                                    <MoneyInput id="salary-tax" value={salaryForm.tax} onChange={(v) => setSalaryForm({ ...salaryForm, tax: v })} />
+                                </FormField>
+                                <FormField label="Other deductions" htmlFor="salary-other" required>
+                                    <MoneyInput id="salary-other" value={salaryForm.otherDeduction} onChange={(v) => setSalaryForm({ ...salaryForm, otherDeduction: v })} />
+                                </FormField>
+                            </fieldset>
+
+                            <div className="lg:pl-8 lg:border-l lg:border-surface-200 flex flex-col justify-center">
+                                <p className="text-sm text-surface-600">Estimated net pay</p>
+                                <p className="mt-2 text-4xl font-medium leading-none text-surface-900 tabular-nums">{formatINR(estimatedNet)}</p>
+                                <p className="mt-3 text-xs text-surface-500">Final amount may vary based on attendance</p>
                             </div>
                         </div>
-                        <div className="pt-4 flex justify-end">
-                            <button type="submit" disabled={saving} className="flex items-center gap-2 px-8 py-3 bg-orbit-600 text-white rounded-xl font-medium hover:bg-orbit-700 transition-colors disabled:opacity-50">
-                                {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
-                                Save Salary Structure
-                            </button>
-                        </div>
+
+                        <SaveButton saving={saving}>Save salary structure</SaveButton>
                     </form>
                 )}
 
                 {activeTab === 'attendance' && (
                     <form onSubmit={handleSaveAttendance} className="space-y-6 animate-fade-in">
-                        <h3 className="text-xl font-medium text-surface-900">Monthly Attendance Summary</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Total Working Days</label>
+                        <h3 className="text-base font-medium text-surface-900">Monthly attendance summary</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <FormField label="Total working days" htmlFor="att-working" required>
                                 <input
+                                    id="att-working"
                                     type="number" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={`${inputCls} tabular-nums`}
                                     value={attendanceForm.workingDays}
                                     onChange={e => setAttendanceForm({ ...attendanceForm, workingDays: Number(e.target.value) })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Present Days</label>
+                            </FormField>
+                            <FormField label="Present days" htmlFor="att-present" required>
                                 <input
+                                    id="att-present"
                                     type="number" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={`${inputCls} tabular-nums`}
                                     value={attendanceForm.presentDays}
                                     onChange={e => setAttendanceForm({ ...attendanceForm, presentDays: Number(e.target.value) })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Leave Days</label>
+                            </FormField>
+                            <FormField label="Leave days" htmlFor="att-leave" required>
                                 <input
+                                    id="att-leave"
                                     type="number" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={`${inputCls} tabular-nums`}
                                     value={attendanceForm.leaveDays}
                                     onChange={e => setAttendanceForm({ ...attendanceForm, leaveDays: Number(e.target.value) })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Overtime Hours</label>
+                            </FormField>
+                            <FormField label="Overtime hours" htmlFor="att-overtime" required>
                                 <input
+                                    id="att-overtime"
                                     type="number" step="0.5" required
-                                    className="w-full px-4 py-3 border border-surface-200 rounded-lg focus:ring-2 focus:ring-orbit-500/20 outline-none"
+                                    className={`${inputCls} tabular-nums`}
                                     value={attendanceForm.overtimeHours}
                                     onChange={e => setAttendanceForm({ ...attendanceForm, overtimeHours: Number(e.target.value) })}
                                 />
-                            </div>
+                            </FormField>
                         </div>
-                        <div className="pt-4 flex justify-end">
-                            <button type="submit" disabled={saving} className="flex items-center gap-2 px-8 py-3 bg-orbit-600 text-white rounded-xl font-medium hover:bg-orbit-700 transition-colors disabled:opacity-50">
-                                {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
-                                Update Attendance
-                            </button>
-                        </div>
+                        <SaveButton saving={saving}>Update attendance</SaveButton>
                     </form>
                 )}
             </div>

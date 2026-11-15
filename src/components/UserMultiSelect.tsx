@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { getEmployeesPaginated } from '../api/services';
 import type { User } from '../types';
-import { Search, X, Check, UserCheck, Loader2 } from 'lucide-react';
+import { Search, X, Check, Loader2 } from 'lucide-react';
+import { StatusDot, formatEnum } from './StatusDot';
 
 interface UserMultiSelectProps {
     selectedUserIds: string[];
@@ -117,12 +118,12 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                 <div className="flex flex-wrap gap-2 p-3 bg-surface-50 border border-surface-200 rounded-lg">
                     <div className="w-full flex items-center justify-between text-xs font-medium text-surface-600 mb-1">
                         <span>
-                            Selected Team Members ({selectedUserIds.length})
+                            Selected members ({selectedUserIds.length})
                         </span>
                         <button
                             type="button"
                             onClick={() => onChange([])}
-                            className="text-xs text-red-600 hover:text-red-700 font-medium"
+                            className="text-xs text-surface-600 hover:text-surface-900 transition-colors"
                         >
                             Clear all
                         </button>
@@ -160,7 +161,7 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search employees by name or email..."
+                    placeholder="Search by name or email"
                     className="w-full pl-10 pr-10 py-2.5 bg-white border border-surface-200 rounded-lg text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-orbit-500/20 focus:border-orbit-500 transition-colors"
                 />
                 {searchTerm && (
@@ -193,7 +194,7 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                         </span>
                         {areAllOnPageSelected ? 'Deselect visible' : 'Select all visible'}
                     </button>
-                    <span>Showing {users.length} user(s)</span>
+                    <span className="tabular-nums">Showing {users.length}</span>
                 </div>
             )}
 
@@ -201,7 +202,7 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
             <div className="border border-surface-200 rounded-lg bg-white max-h-60 overflow-y-auto divide-y divide-surface-100 shadow-sm">
                 {users.length === 0 && !loading ? (
                     <div className="p-6 text-center text-xs text-surface-500">
-                        No employees found matching &quot;{searchTerm}&quot;.
+                        {searchTerm ? <>No employees match &quot;{searchTerm}&quot;</> : 'No employees found'}
                     </div>
                 ) : (
                     users.map((user) => {
@@ -239,19 +240,16 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-3 text-xs text-surface-500">
                                     {user.phone ? (
-                                        <span className="text-xs font-mono text-surface-500 bg-surface-100 px-2 py-0.5 rounded">
-                                            {user.phone}
-                                        </span>
+                                        <span className="font-mono tabular-nums">{user.phone}</span>
                                     ) : (
-                                        <span className="text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <StatusDot tone="warning" />
                                             No phone
                                         </span>
                                     )}
-                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100 text-surface-700">
-                                        {user.role}
-                                    </span>
+                                    <span>{formatEnum(user.role)}</span>
                                 </div>
                             </div>
                         );
@@ -261,7 +259,7 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                 {loading && (
                     <div className="p-4 flex items-center justify-center gap-2 text-xs text-surface-500">
                         <Loader2 className="w-4 h-4 animate-spin text-orbit-500" />
-                        Loading employees...
+                        Loading employees
                     </div>
                 )}
             </div>
@@ -271,14 +269,14 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
                 <button
                     type="button"
                     onClick={handleLoadMore}
-                    className="w-full py-2 border border-surface-200 rounded-lg text-xs font-medium text-surface-700 hover:bg-surface-50 transition-colors"
+                    className="w-full h-9 border border-surface-200 rounded-lg text-sm font-medium text-surface-700 hover:bg-surface-50 transition-colors"
                 >
-                    Load More Employees
+                    Load more employees
                 </button>
             )}
 
             {error && (
-                <p className="text-xs text-red-600 font-medium animate-fade-in flex items-center gap-1">
+                <p className="text-xs text-accent-rose animate-fade-in flex items-center gap-1">
                     <span>•</span> {error}
                 </p>
             )}

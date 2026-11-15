@@ -4,18 +4,12 @@ import { getAllPayroll, deletePayroll } from '../services/payrollService';
 import { EmployeePayroll } from '../types';
 import { usePagination } from '../../../hooks/usePagination';
 import { PaginatedPanel } from '../../../components/PaginatedPanel';
-import {
-    DollarSign,
-    Search,
-    Plus,
-    Eye,
-    Edit2,
-    Trash2,
-    Briefcase,
-    Building2,
-    TrendingUp,
-    Download
-} from 'lucide-react';
+import { PageHeader } from '../../../components/PageHeader';
+import { Avatar } from '../../../components/Avatar';
+import { Stat } from '../../../components/Stat';
+import { formatEnum } from '../../../components/StatusDot';
+import { btn, inputCls, formatINR } from '../../../components/ui';
+import { Search, Plus, Eye, Pencil, Trash2, Download, RefreshCw } from 'lucide-react';
 
 const PayrollListPage: React.FC = () => {
     const navigate = useNavigate();
@@ -58,83 +52,54 @@ const PayrollListPage: React.FC = () => {
     // Client-side pagination (back to page 1 when the search changes)
     const { pageItems, paginationProps } = usePagination(filtered, { resetKey: search });
 
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-medium text-surface-900 flex items-center gap-2">
-                        <DollarSign className="w-8 h-8 text-orbit-600" />
-                        Payroll Management
-                    </h1>
-                    <p className="text-sm text-surface-500 mt-1">Manage employee salaries, bank details, and compliance</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => fetchData()}
-                        className="p-2.5 border border-surface-200 rounded-lg text-surface-600 bg-white hover:bg-surface-50 transition-colors"
-                    >
-                        <TrendingUp className="w-5 h-5" />
-                    </button>
-                    <button
-                        onClick={() => navigate('/admin/payroll/create')}
-                        className="flex items-center gap-2 px-6 py-3 bg-orbit-600 text-white rounded-lg font-medium hover:bg-orbit-700 transition-colors active:scale-[0.98]"
-                    >
-                        <Plus className="w-5 h-5" />
-                        Create Payroll
-                    </button>
-                </div>
-            </div>
+    const monthlyPayout = payrollList.reduce((acc, curr) => acc + (curr.netSalary || 0), 0);
 
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-card border border-surface-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-orbit-50 rounded-lg flex items-center justify-center text-orbit-600">
-                        <Briefcase className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-medium text-surface-500">Total Employees</p>
-                        <p className="text-2xl font-medium text-surface-900">{payrollList.length}</p>
-                    </div>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-card border border-surface-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-accent-emerald/10 rounded-lg flex items-center justify-center text-accent-emerald">
-                        <DollarSign className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-medium text-surface-500">Monthly Payout</p>
-                        <p className="text-2xl font-medium text-surface-900">
-                            ${payrollList.reduce((acc, curr) => acc + (curr.netSalary || 0), 0).toLocaleString()}
-                        </p>
-                    </div>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-card border border-surface-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-orbit-600/10 rounded-lg flex items-center justify-center text-orbit-600">
-                        <Building2 className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-medium text-surface-500">Departments</p>
-                        <p className="text-2xl font-medium text-surface-900">
-                            {new Set(payrollList.map(p => p.department)).size}
-                        </p>
-                    </div>
-                </div>
+    return (
+        <div className="space-y-6 pb-12">
+            <PageHeader
+                title="Payroll"
+                description="Manage employee salaries, bank details and compliance"
+                actions={
+                    <>
+                        <button
+                            onClick={() => fetchData()}
+                            className={`${btn.secondary} !px-0 w-9`}
+                            title="Refresh"
+                            aria-label="Refresh payroll list"
+                        >
+                            <RefreshCw className="w-4 h-4" strokeWidth={1.5} />
+                        </button>
+                        <button onClick={() => navigate('/admin/payroll/create')} className={btn.primary}>
+                            <Plus className="w-4 h-4" strokeWidth={1.5} />
+                            Create payroll
+                        </button>
+                    </>
+                }
+            />
+
+            {/* Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Stat label="Employees" value={payrollList.length} />
+                <Stat label="Monthly payout" value={formatINR(monthlyPayout)} />
+                <Stat label="Departments" value={new Set(payrollList.map(p => p.department)).size} />
             </div>
 
             {/* Search */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" strokeWidth={1.5} />
                     <input
                         type="text"
-                        placeholder="Search by name, email or department..."
+                        aria-label="Search payroll records"
+                        placeholder="Search by name, email or department"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-surface-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orbit-500/30 focus:border-orbit-500 transition-colors"
+                        className={`${inputCls} h-9 pl-9`}
                     />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2.5 border border-surface-200 rounded-lg text-surface-600 bg-white hover:bg-surface-50 transition-colors">
-                    <Download className="w-4 h-4" />
-                    <span className="text-sm font-medium">Export</span>
+                <button className={btn.secondary}>
+                    <Download className="w-4 h-4" strokeWidth={1.5} />
+                    Export
                 </button>
             </div>
 
@@ -148,76 +113,60 @@ const PayrollListPage: React.FC = () => {
                     description: 'Try adjusting your search or add a new employee payroll record.',
                 }}
                 pagination={paginationProps}
-                tbodyClassName="divide-y divide-surface-50"
+                tbodyClassName="divide-y divide-surface-100"
                 tableHead={
-                    <tr className="bg-surface-50 border-b border-surface-100">
-                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Employee</th>
-                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Department</th>
-                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Position</th>
-                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Type</th>
-                        <th className="text-left text-xs font-medium text-surface-500 px-6 py-4">Net Salary</th>
-                        <th className="text-right text-xs font-medium text-surface-500 px-6 py-4">Actions</th>
+                    <tr className="bg-surface-50 border-b border-surface-200">
+                        <th className="th">Employee</th>
+                        <th className="th">Department</th>
+                        <th className="th">Position</th>
+                        <th className="th">Type</th>
+                        <th className="th text-right">Net salary</th>
+                        <th className="th text-right">Actions</th>
                     </tr>
                 }
             >
-                {pageItems.map((item, i) => (
-                    <tr
-                        key={item.id}
-                        className="hover:bg-orbit-50/20 transition-colors"
-                        style={{ animationDelay: `${i * 0.05}s` }}
-                    >
-                        <td className="px-6 py-4">
+                {pageItems.map((item) => (
+                    <tr key={item.id} className="hover:bg-surface-50 transition-colors duration-150">
+                        <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-orbit-500 to-orbit-700 rounded-lg flex items-center justify-center text-white font-medium shadow-sm">
-                                    {item.name.charAt(0)}
-                                </div>
+                                <Avatar name={item.name} />
                                 <div>
-                                    <p className="text-sm font-medium text-surface-900">{item.name}</p>
+                                    <p className="text-sm font-medium text-surface-900 whitespace-nowrap">{item.name}</p>
                                     <p className="text-xs text-surface-500">{item.email}</p>
                                 </div>
                             </div>
                         </td>
-                        <td className="px-6 py-4">
-                            <span className="text-sm font-medium text-surface-700">{item.department}</span>
+                        <td className="px-5 py-3 text-sm text-surface-700">{item.department}</td>
+                        <td className="px-5 py-3 text-sm text-surface-600">{item.designation}</td>
+                        <td className="px-5 py-3 text-sm text-surface-600">{formatEnum(item.employmentType)}</td>
+                        <td className="px-5 py-3 text-right text-sm font-medium text-surface-900 tabular-nums">
+                            {formatINR(item.netSalary || 0)}
                         </td>
-                        <td className="px-6 py-4 text-sm text-surface-600">
-                            {item.designation}
-                        </td>
-                        <td className="px-6 py-4">
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${item.employmentType === 'FULL_TIME'
-                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                    : 'bg-amber-50 text-amber-600 border-amber-100'
-                                }`}>
-                                {item.employmentType}
-                            </span>
-                        </td>
-                        <td className="px-6 py-4">
-                            <span className="text-sm font-medium text-orbit-600">
-                                ${item.netSalary?.toLocaleString() || '0'}
-                            </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                        <td className="px-5 py-3">
+                            <div className="flex items-center justify-end gap-1">
                                 <button
                                     onClick={() => navigate(`/admin/payroll/details/${item.id}`)}
-                                    className="p-2 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
-                                    title="View Details"
+                                    className={btn.icon}
+                                    title="View details"
+                                    aria-label={`View payroll for ${item.name}`}
                                 >
-                                    <Eye className="w-4.5 h-4.5" />
+                                    <Eye className="w-4 h-4" strokeWidth={1.5} />
                                 </button>
                                 <button
                                     onClick={() => navigate(`/admin/payroll/edit/${item.id}`)}
-                                    className="p-2 text-surface-400 hover:text-orbit-600 hover:bg-orbit-50 rounded-lg transition-colors"
+                                    className={btn.icon}
                                     title="Edit"
+                                    aria-label={`Edit payroll for ${item.name}`}
                                 >
-                                    <Edit2 className="w-4.5 h-4.5" />
+                                    <Pencil className="w-4 h-4" strokeWidth={1.5} />
                                 </button>
                                 <button
                                     onClick={() => handleDelete(item.id, item.name)}
-                                    className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    className={btn.iconDanger}
                                     title="Delete"
+                                    aria-label={`Delete payroll for ${item.name}`}
                                 >
-                                    <Trash2 className="w-4.5 h-4.5" />
+                                    <Trash2 className="w-4 h-4" strokeWidth={1.5} />
                                 </button>
                             </div>
                         </td>

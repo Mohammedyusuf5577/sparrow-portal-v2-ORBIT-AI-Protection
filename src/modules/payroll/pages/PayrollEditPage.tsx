@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPayrollById, updatePayroll } from '../services/payrollService';
-import {
-    ArrowLeft,
-    Save,
-    User as UserIcon,
-    Mail,
-    Phone,
-    Building,
-    Calendar,
-    Briefcase
-} from 'lucide-react';
+import { PageHeader } from '../../../components/PageHeader';
+import { FormField } from '../../../components/FormField';
+import { btn, inputCls } from '../../../components/ui';
+import { ArrowLeft } from 'lucide-react';
 
 const PayrollEditPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -68,157 +62,119 @@ const PayrollEditPage: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="flex items-center justify-center h-screen">
-            <div className="w-12 h-12 border-4 border-orbit-200 border-t-orbit-600 rounded-full animate-spin" />
+        <div className="flex items-center justify-center h-64">
+            <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-surface-200 border-t-orbit-600 rounded-full animate-spin" />
         </div>
     );
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-3xl space-y-6 pb-16">
             <button
                 onClick={() => navigate(`/admin/payroll/details/${id}`)}
-                className="flex items-center gap-2 text-surface-500 hover:text-orbit-600 font-medium transition-colors group"
+                className="inline-flex items-center gap-2 text-sm text-surface-600 hover:text-surface-900 transition-colors"
             >
-                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                Back to Details
+                <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+                Back to details
             </button>
 
-            <div className="bg-white rounded-2xl shadow-card overflow-hidden border border-surface-100">
-                <div className="px-8 py-6 bg-gradient-to-r from-orbit-600 to-orbit-800 text-white">
-                    <h1 className="text-2xl font-medium">Edit Payroll Profile</h1>
-                    <p className="text-white/80 mt-1">Update basic employment profile for {formData.name}</p>
-                </div>
+            <PageHeader title="Edit payroll profile" description={`Update the basic employment profile for ${formData.name}`} />
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-8">
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-2 pb-2 border-b border-surface-100">
-                            <UserIcon className="w-5 h-5 text-orbit-600" />
-                            <h2 className="text-lg font-medium text-surface-900">Basic Information</h2>
-                        </div>
+            <form onSubmit={handleSubmit} className="panel p-6 space-y-8">
+                <section className="space-y-5">
+                    <h2 className="text-base font-medium text-surface-900">Basic information</h2>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Full Name</label>
-                                <div className="relative">
-                                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-600/20 focus:border-orbit-600 outline-none transition-colors"
-                                    />
-                                </div>
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <FormField label="Full name" htmlFor="edit-name" required>
+                            <input
+                                id="edit-name"
+                                type="text"
+                                required
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                className={inputCls}
+                            />
+                        </FormField>
 
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Email Address</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-                                    <input
-                                        type="email"
-                                        required
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-600/20 focus:border-orbit-600 outline-none transition-colors"
-                                    />
-                                </div>
-                            </div>
+                        <FormField label="Email address" htmlFor="edit-email" required>
+                            <input
+                                id="edit-email"
+                                type="email"
+                                required
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                className={inputCls}
+                            />
+                        </FormField>
 
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Mobile Number</label>
-                                <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.mobile}
-                                        onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-600/20 focus:border-orbit-600 outline-none transition-colors"
-                                    />
-                                </div>
-                            </div>
+                        <FormField label="Mobile number" htmlFor="edit-mobile" required>
+                            <input
+                                id="edit-mobile"
+                                type="text"
+                                required
+                                value={formData.mobile}
+                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                                className={inputCls}
+                            />
+                        </FormField>
 
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Department</label>
-                                <div className="relative">
-                                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.department}
-                                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-600/20 focus:border-orbit-600 outline-none transition-colors"
-                                    />
-                                </div>
-                            </div>
+                        <FormField label="Department" htmlFor="edit-department" required>
+                            <input
+                                id="edit-department"
+                                type="text"
+                                required
+                                value={formData.department}
+                                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                className={inputCls}
+                            />
+                        </FormField>
 
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Designation</label>
-                                <div className="relative">
-                                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.designation}
-                                        onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-600/20 focus:border-orbit-600 outline-none transition-colors"
-                                    />
-                                </div>
-                            </div>
+                        <FormField label="Designation" htmlFor="edit-designation" required>
+                            <input
+                                id="edit-designation"
+                                type="text"
+                                required
+                                value={formData.designation}
+                                onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                                className={inputCls}
+                            />
+                        </FormField>
 
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Join Date</label>
-                                <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-                                    <input
-                                        type="date"
-                                        required
-                                        value={formData.joinDate}
-                                        onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-600/20 focus:border-orbit-600 outline-none transition-colors"
-                                    />
-                                </div>
-                            </div>
+                        <FormField label="Join date" htmlFor="edit-join" required>
+                            <input
+                                id="edit-join"
+                                type="date"
+                                required
+                                value={formData.joinDate}
+                                onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
+                                className={inputCls}
+                            />
+                        </FormField>
 
-                            <div>
-                                <label className="block text-xs font-medium text-surface-500 mb-2">Employment Type</label>
-                                <select
-                                    required
-                                    value={formData.employmentType}
-                                    onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:ring-2 focus:ring-orbit-600/20 focus:border-orbit-600 outline-none transition-colors appearance-none bg-white"
-                                >
-                                    <option value="FULL_TIME">Full Time</option>
-                                    <option value="CONTRACT">Contract</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div className="pt-6 border-t border-surface-100 flex items-center justify-end gap-4">
-                        <button
-                            type="button"
-                            onClick={() => navigate(`/admin/payroll/details/${id}`)}
-                            className="px-6 py-3 rounded-lg border border-surface-200 text-surface-600 font-medium hover:bg-surface-50 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="flex items-center gap-2 px-10 py-3 bg-orbit-600 text-white rounded-xl font-medium shadow-elevated hover:bg-orbit-700 transition-colors active:scale-[0.98] disabled:opacity-50"
-                        >
-                            {saving ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <Save className="w-5 h-5" />
-                            )}
-                            Update Profile
-                        </button>
+                        <FormField label="Employment type" htmlFor="edit-type" required>
+                            <select
+                                id="edit-type"
+                                required
+                                value={formData.employmentType}
+                                onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}
+                                className={`${inputCls} cursor-pointer`}
+                            >
+                                <option value="FULL_TIME">Full time</option>
+                                <option value="CONTRACT">Contract</option>
+                            </select>
+                        </FormField>
                     </div>
-                </form>
-            </div>
+                </section>
+
+                <div className="pt-5 border-t border-surface-200 flex items-center justify-end gap-2">
+                    <button type="button" onClick={() => navigate(`/admin/payroll/details/${id}`)} className={btn.secondary}>
+                        Cancel
+                    </button>
+                    <button type="submit" disabled={saving} className={btn.primary}>
+                        {saving && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                        Update profile
+                    </button>
+                </div>
+            </form>
         </div>
     );
 };
